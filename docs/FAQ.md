@@ -135,20 +135,19 @@ Diff mode produces a `security-report/diff-report.md` that shows new vulnerabili
 
 ### 13. How do I add a custom vulnerability skill?
 
-1. Copy `templates/SKILL_TEMPLATE.md` to `scan-target/.claude/skills/sc-{your-skill}.md`
+1. Create a new folder `skills/sc-{your-skill}/` with a `SKILL.md` file (use `templates/SKILL_TEMPLATE.md` as starting point)
 2. Fill in all required sections (Purpose, Activation, Phase 1, Phase 2, Severity Classification, Language-Specific Notes, Output Format, Common False Positives)
-3. Copy the same file to `scan-target/.agents/skills/sc-{your-skill}.md`
-4. Update `scan-target/CLAUDE.md` and `scan-target/AGENTS.md` to include your skill in the pipeline
+3. Update `scan-target/CLAUDE.md` and `scan-target/AGENTS.md` to include your skill in the pipeline
 
 See `docs/SKILL_DEVELOPMENT_GUIDE.md` for detailed instructions and `templates/SKILL_TEMPLATE.md` for the file template.
 
 ### 14. How do I add support for a new programming language?
 
-Adding a new language requires two files:
+Adding a new language requires two files inside a skill folder:
 
-1. **Language skill:** Copy `templates/LANG_SKILL_TEMPLATE.md` to `scan-target/.claude/skills/sc-lang-{language}.md`. Define 15-25 categories of language-specific vulnerability patterns with dangerous functions, safe alternatives, and code examples.
+1. **Language skill:** Create `skills/sc-lang-{language}/SKILL.md` (use `templates/LANG_SKILL_TEMPLATE.md`). Define 15-25 categories of language-specific vulnerability patterns with dangerous functions, safe alternatives, and code examples.
 
-2. **Security checklist:** Copy `templates/CHECKLIST_TEMPLATE.md` to `checklists/{language}-security-checklist.md`. Create at least 400 unique security check items organized into 20 categories, each with a unique ID, description, severity level, and CWE reference.
+2. **Security checklist:** Create `skills/sc-lang-{language}/references/{language}-security-checklist.md` (use `templates/CHECKLIST_TEMPLATE.md`). Create at least 400 unique security check items organized into 20 categories, each with a unique ID, description, severity level, and CWE reference.
 
 See `docs/SKILL_DEVELOPMENT_GUIDE.md` for complete instructions.
 

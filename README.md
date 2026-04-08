@@ -51,8 +51,9 @@ irm https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.ps1 | 
 
 ```bash
 git clone https://github.com/ersinkoc/security-check.git
-cp -r security-check/scan-target/.claude /path/to/your/project/
-cp -r security-check/scan-target/CLAUDE.md /path/to/your/project/
+cp security-check/scan-target/CLAUDE.md /path/to/your/project/
+mkdir -p /path/to/your/project/.claude/skills
+cp -r security-check/skills/sc-* /path/to/your/project/.claude/skills/
 ```
 </details>
 

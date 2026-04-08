@@ -202,7 +202,7 @@ description: {Language}-specific security deep scan
 ## Output Format
 ```
 
-Language skills reference their corresponding checklist file in `checklists/{language}-security-checklist.md` and systematically scan for each category defined in that checklist.
+Language skills reference their corresponding checklist file in `references/{language}-security-checklist.md` (relative to the skill folder) and systematically scan for each category defined in that checklist.
 
 ---
 
@@ -334,13 +334,13 @@ sc-recon identifies languages by examining:
 
 | Detected Language | Skill Activated | Checklist Referenced |
 |-------------------|-----------------|----------------------|
-| Go | sc-lang-go | checklists/go-security-checklist.md |
-| TypeScript/JavaScript | sc-lang-typescript | checklists/typescript-security-checklist.md |
-| Python | sc-lang-python | checklists/python-security-checklist.md |
-| PHP | sc-lang-php | checklists/php-security-checklist.md |
-| Rust | sc-lang-rust | checklists/rust-security-checklist.md |
-| Java/Kotlin | sc-lang-java | checklists/java-security-checklist.md |
-| C#/.NET | sc-lang-csharp | checklists/csharp-security-checklist.md |
+| Go | sc-lang-go | references/go-security-checklist.md |
+| TypeScript/JavaScript | sc-lang-typescript | references/typescript-security-checklist.md |
+| Python | sc-lang-python | references/python-security-checklist.md |
+| PHP | sc-lang-php | references/php-security-checklist.md |
+| Rust | sc-lang-rust | references/rust-security-checklist.md |
+| Java/Kotlin | sc-lang-java | references/java-security-checklist.md |
+| C#/.NET | sc-lang-csharp | references/csharp-security-checklist.md |
 
 Multiple language skills can activate simultaneously for polyglot projects. A project containing both Python and TypeScript will trigger both `sc-lang-python` and `sc-lang-typescript`.
 
@@ -541,38 +541,33 @@ Quick assessment of whether the PR improves or degrades security posture.
 ```
 project-root/
 ├── .claude/
-│   └── skills/                  # Claude Code skill files
-│       ├── sc-orchestrator.md   # Master orchestrator
-│       ├── sc-recon.md          # Phase 1: Reconnaissance
-│       ├── sc-dependency-audit.md
-│       ├── sc-sqli.md           # Phase 2: Vulnerability skills (40+)
-│       ├── sc-xss.md
-│       ├── sc-lang-python.md    # Phase 2: Language skills (7)
+│   └── skills/                  # Claude Code skill files (installed by skills.sh)
+│       ├── sc-orchestrator/
+│       │   └── SKILL.md         # Master orchestrator
+│       ├── sc-recon/
+│       │   └── SKILL.md         # Phase 1: Reconnaissance
+│       ├── sc-sqli/
+│       │   └── SKILL.md         # Phase 2: Vulnerability skills (40+)
+│       ├── sc-lang-python/
+│       │   ├── SKILL.md         # Phase 2: Language skills (7)
+│       │   └── references/
+│       │       └── python-security-checklist.md
 │       ├── ...
-│       ├── sc-verifier.md       # Phase 3: Verification
-│       ├── sc-report.md         # Phase 4: Reporting
-│       └── sc-diff-report.md    # Diff mode reporting
+│       ├── sc-verifier/
+│       │   └── SKILL.md         # Phase 3: Verification
+│       └── sc-report/
+│           └── SKILL.md         # Phase 4: Reporting
 │
 ├── .agents/
-│   └── skills/                  # Mirror of .claude/skills/ for other platforms
-│       └── (identical files)
-│
-├── checklists/                  # Language security checklists
-│   ├── go-security-checklist.md
-│   ├── typescript-security-checklist.md
-│   ├── python-security-checklist.md
-│   ├── php-security-checklist.md
-│   ├── rust-security-checklist.md
-│   ├── java-security-checklist.md
-│   ├── csharp-security-checklist.md
-│   ├── api-security-checklist.md
-│   ├── docker-security-checklist.md
-│   └── cicd-security-checklist.md
+│   └── skills/                  # Mirror for other platforms (Codex, Cursor, etc.)
+│       └── (identical structure)
 │
 ├── security-report/             # Generated output (created during scan)
 │   ├── architecture.md
 │   ├── dependency-audit.md
-│   ├── *-results.md
+│   ├── findings/
+│   │   ├── sc-sqli.json
+│   │   └── ...
 │   ├── verified-findings.md
 │   ├── SECURITY-REPORT.md
 │   └── diff-report.md

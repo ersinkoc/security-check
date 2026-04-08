@@ -19,7 +19,7 @@ If {Language} is not detected during reconnaissance, this skill does not run.
 
 ## Checklist Reference
 
-This skill references `checklists/{language}-security-checklist.md`. It systematically scans the codebase for each category in the checklist. When a checklist item is found to be violated, it is reported as a finding with the checklist item ID (e.g., SC-{LANG}-042) included in the finding title.
+This skill references `references/{language}-security-checklist.md`. It systematically scans the codebase for each category in the checklist. When a checklist item is found to be violated, it is reported as a finding with the checklist item ID (e.g., SC-{LANG}-042) included in the finding title.
 
 The checklist contains 400+ security check items organized into 20 categories. This skill does not need to check every item -- it prioritizes items that are detectable through static analysis and skips items that require runtime testing.
 

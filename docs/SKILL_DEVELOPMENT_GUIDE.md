@@ -40,14 +40,13 @@ Create a **language skill** when:
 
 ### File Locations
 
-Place your skill files in both directories to ensure cross-platform compatibility:
+Place your skill in the canonical `skills/` directory following the agentskills.io format:
 
 ```
-scan-target/.claude/skills/sc-{your-skill}.md
-scan-target/.agents/skills/sc-{your-skill}.md
+skills/sc-{your-skill}/SKILL.md
 ```
 
-Both files must be identical. The `.claude/skills/` path is used by Claude Code, and `.agents/skills/` is used by Codex, Cursor, Opencode, Windsurf, and Gemini CLI.
+The `skills.sh` installer copies skills to `.claude/skills/` or `.agents/skills/` in the target project during installation. You only need to maintain the single source in `skills/`.
 
 ---
 
@@ -424,7 +423,7 @@ Language skills follow a specialized format. See `templates/LANG_SKILL_TEMPLATE.
 |---------|-------------------|----------------|
 | Discovery | Glob + grep + semantic patterns | Category-based systematic scan |
 | Verification | Exploitability checklist | Pattern-specific verification |
-| Checklist | None | References `checklists/{lang}-security-checklist.md` |
+| Checklist | None | References `references/{lang}-security-checklist.md` |
 | Categories | Single vulnerability class | 15-25 vulnerability categories |
 
 ### Category Structure
@@ -457,7 +456,7 @@ Language skills must reference their corresponding checklist:
 
 ```markdown
 ## Checklist Reference
-This skill references `checklists/{language}-security-checklist.md`.
+This skill references `references/{language}-security-checklist.md`.
 It systematically scans the codebase for each category in the checklist.
 When a checklist item is found to be violated, it is reported as a finding
 with the checklist item ID (e.g., SC-PY-042) included in the finding title.
@@ -586,7 +585,7 @@ Before submitting your skill:
 - [ ] CWE references are accurate (verified against cwe.mitre.org)
 - [ ] Severity definitions are specific to the vulnerability type
 - [ ] Common false positives section has at least 3 entries
-- [ ] Skill file is copied to both `.claude/skills/` and `.agents/skills/`
+- [ ] Skill is placed in `skills/sc-{name}/SKILL.md` (agentskills.io format)
 - [ ] CLAUDE.md and AGENTS.md reference the new skill (if adding a new skill to the pipeline)
 
 ---
@@ -659,11 +658,9 @@ Before submitting your skill:
 
 | Item | Path |
 |------|------|
-| Vulnerability skill (Claude Code) | `scan-target/.claude/skills/sc-{name}.md` |
-| Vulnerability skill (Agents) | `scan-target/.agents/skills/sc-{name}.md` |
-| Language skill (Claude Code) | `scan-target/.claude/skills/sc-lang-{language}.md` |
-| Language skill (Agents) | `scan-target/.agents/skills/sc-lang-{language}.md` |
-| Language checklist | `checklists/{language}-security-checklist.md` |
+| Vulnerability skill (source) | `skills/sc-{name}/SKILL.md` |
+| Language skill (source) | `skills/sc-lang-{language}/SKILL.md` |
+| Language checklist | `skills/sc-lang-{language}/references/{language}-security-checklist.md` |
 | Vulnerability skill template | `templates/SKILL_TEMPLATE.md` |
 | Language skill template | `templates/LANG_SKILL_TEMPLATE.md` |
 | Checklist template | `templates/CHECKLIST_TEMPLATE.md` |

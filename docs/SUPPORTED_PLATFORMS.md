@@ -19,18 +19,48 @@ security-check works with any LLM-based AI coding assistant that supports skill 
 
 ---
 
-## Claude Code
+## Installation
 
-Claude Code is Anthropic's official CLI for Claude. It natively supports skill files in the `.claude/skills/` directory and reads project instructions from `CLAUDE.md` at the project root.
-
-### Automatic Installation
+### Recommended: npx (All Platforms)
 
 ```bash
 cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
+npx skills add ersinkoc/security-check
 ```
 
-The installer automatically detects Claude Code and installs the appropriate files.
+This auto-detects your platform and installs the appropriate files.
+
+### Alternative: Shell Script (macOS/Linux)
+
+```bash
+cd /path/to/your/project
+curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.sh | bash
+```
+
+With options:
+```bash
+# Install only specific categories
+curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.sh | bash -s -- --category injection server
+
+# Install only specific languages
+curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.sh | bash -s -- --lang go typescript python
+
+# List all available categories
+curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.sh | bash -s -- --list
+```
+
+### Alternative: PowerShell (Windows)
+
+```powershell
+cd C:\path\to\your\project
+irm https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.ps1 | iex
+```
+
+---
+
+## Claude Code
+
+Claude Code is Anthropic's official CLI for Claude. It natively supports skill files in the `.claude/skills/` directory and reads project instructions from `CLAUDE.md` at the project root.
 
 ### Manual Installation
 
@@ -41,12 +71,9 @@ git clone https://github.com/ersinkoc/security-check.git /tmp/security-check
 # Copy the orchestration file
 cp /tmp/security-check/scan-target/CLAUDE.md ./CLAUDE.md
 
-# Copy skill files
+# Copy skill files (agentskills.io folder format)
 mkdir -p .claude/skills
-cp /tmp/security-check/scan-target/.claude/skills/*.md .claude/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .claude/skills/
 
 # Clean up
 rm -rf /tmp/security-check
@@ -57,24 +84,23 @@ rm -rf /tmp/security-check
 ```
 your-project/
 ├── CLAUDE.md                    # Orchestration instructions
-├── .claude/
-│   └── skills/
-│       ├── sc-orchestrator.md
-│       ├── sc-recon.md
-│       ├── sc-dependency-audit.md
-│       ├── sc-sqli.md
-│       ├── sc-xss.md
-│       ├── ... (40+ skill files)
-│       ├── sc-lang-go.md
-│       ├── sc-lang-typescript.md
-│       ├── ... (7 language skills)
-│       ├── sc-verifier.md
-│       ├── sc-report.md
-│       └── sc-diff-report.md
-└── checklists/
-    ├── go-security-checklist.md
-    ├── typescript-security-checklist.md
-    └── ... (10 checklist files)
+└── .claude/
+    └── skills/
+        ├── sc-orchestrator/
+        │   └── SKILL.md
+        ├── sc-recon/
+        │   └── SKILL.md
+        ├── sc-sqli/
+        │   └── SKILL.md
+        ├── ... (48 skill folders)
+        ├── sc-lang-go/
+        │   ├── SKILL.md
+        │   └── references/
+        │       └── go-security-checklist.md
+        ├── sc-verifier/
+        │   └── SKILL.md
+        └── sc-report/
+            └── SKILL.md
 ```
 
 ### Existing CLAUDE.md
@@ -119,15 +145,6 @@ Claude Code supports subagent spawning via the `Task` tool. When available, Phas
 
 Codex is OpenAI's coding agent. It reads instruction files from `AGENTS.md` and skill files from the `.agents/skills/` directory.
 
-### Automatic Installation
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
-```
-
-The installer detects Codex environments and installs the `.agents/` format files.
-
 ### Manual Installation
 
 ```bash
@@ -139,10 +156,7 @@ cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 
 # Copy skill files
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 # Clean up
 rm -rf /tmp/security-check
@@ -153,19 +167,17 @@ rm -rf /tmp/security-check
 ```
 your-project/
 ├── AGENTS.md                    # Orchestration instructions
-├── .agents/
-│   └── skills/
-│       ├── sc-orchestrator.md
-│       ├── sc-recon.md
-│       ├── sc-dependency-audit.md
-│       ├── sc-sqli.md
-│       ├── ... (all skill files)
-│       ├── sc-verifier.md
-│       ├── sc-report.md
-│       └── sc-diff-report.md
-└── checklists/
-    ├── go-security-checklist.md
-    └── ... (10 checklist files)
+└── .agents/
+    └── skills/
+        ├── sc-orchestrator/
+        │   └── SKILL.md
+        ├── sc-sqli/
+        │   └── SKILL.md
+        ├── ... (all skill folders)
+        ├── sc-verifier/
+        │   └── SKILL.md
+        └── sc-report/
+            └── SKILL.md
 ```
 
 ### Running a Scan
@@ -190,13 +202,6 @@ Open Codex with your project and use:
 
 Cursor is an AI-powered code editor. It reads agent instructions from `AGENTS.md` and discovers skill files in `.agents/skills/`.
 
-### Automatic Installation
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
-```
-
 ### Manual Installation
 
 ```bash
@@ -208,10 +213,7 @@ cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 
 # Copy skill files
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 # Clean up
 rm -rf /tmp/security-check
@@ -222,11 +224,9 @@ rm -rf /tmp/security-check
 ```
 your-project/
 ├── AGENTS.md
-├── .agents/
-│   └── skills/
-│       └── (all skill files)
-└── checklists/
-    └── (all checklist files)
+└── .agents/
+    └── skills/
+        └── (all skill folders)
 ```
 
 ### Running a Scan
@@ -263,13 +263,6 @@ This is optional -- Cursor reads `AGENTS.md` automatically.
 
 Opencode is an open-source terminal-based AI coding assistant. It supports `AGENTS.md` for project instructions and `.agents/skills/` for skill files.
 
-### Automatic Installation
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
-```
-
 ### Manual Installation
 
 ```bash
@@ -281,25 +274,10 @@ cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 
 # Copy skill files
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 # Clean up
 rm -rf /tmp/security-check
-```
-
-### File Structure After Installation
-
-```
-your-project/
-├── AGENTS.md
-├── .agents/
-│   └── skills/
-│       └── (all skill files)
-└── checklists/
-    └── (all checklist files)
 ```
 
 ### Running a Scan
@@ -325,13 +303,6 @@ In Opencode's terminal interface, type:
 
 Windsurf is Codeium's AI-powered IDE. It supports agent instructions via `AGENTS.md` and discovers skills in `.agents/skills/`.
 
-### Automatic Installation
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
-```
-
 ### Manual Installation
 
 ```bash
@@ -343,25 +314,10 @@ cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 
 # Copy skill files
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 # Clean up
 rm -rf /tmp/security-check
-```
-
-### File Structure After Installation
-
-```
-your-project/
-├── AGENTS.md
-├── .agents/
-│   └── skills/
-│       └── (all skill files)
-└── checklists/
-    └── (all checklist files)
 ```
 
 ### Running a Scan
@@ -396,13 +352,6 @@ When asked to run a security check, follow the instructions in AGENTS.md.
 
 Gemini CLI is Google's command-line AI coding assistant. It supports project instructions via `AGENTS.md` and reads skill files from `.agents/skills/`.
 
-### Automatic Installation
-
-```bash
-cd /path/to/your/project
-curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
-```
-
 ### Manual Installation
 
 ```bash
@@ -414,25 +363,10 @@ cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 
 # Copy skill files
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Copy security checklists
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 # Clean up
 rm -rf /tmp/security-check
-```
-
-### File Structure After Installation
-
-```
-your-project/
-├── AGENTS.md
-├── .agents/
-│   └── skills/
-│       └── (all skill files)
-└── checklists/
-    └── (all checklist files)
 ```
 
 ### Running a Scan
@@ -467,28 +401,25 @@ git clone https://github.com/ersinkoc/security-check.git /tmp/security-check
 # Claude Code format
 cp /tmp/security-check/scan-target/CLAUDE.md ./CLAUDE.md
 mkdir -p .claude/skills
-cp /tmp/security-check/scan-target/.claude/skills/*.md .claude/skills/
+cp -r /tmp/security-check/skills/sc-* .claude/skills/
 
 # Agents format (Codex, Cursor, Opencode, Windsurf, Gemini CLI)
 cp /tmp/security-check/scan-target/AGENTS.md ./AGENTS.md
 mkdir -p .agents/skills
-cp /tmp/security-check/scan-target/.agents/skills/*.md .agents/skills/
-
-# Shared checklists (used by both formats)
-cp -r /tmp/security-check/checklists ./checklists
+cp -r /tmp/security-check/skills/sc-* .agents/skills/
 
 rm -rf /tmp/security-check
 ```
 
-The automated installer (`install.sh`) detects which platforms are present and installs both formats when multiple platforms are detected.
+The `skills.sh` installer auto-detects which platforms are present and installs both formats when multiple platforms are detected.
 
 ### File Compatibility
 
-The skill files in `.claude/skills/` and `.agents/skills/` are identical. They are maintained as mirrors of each other. When contributing new skills, you must place the file in both directories.
+The skill files in `.claude/skills/` and `.agents/skills/` are identical. They are maintained as a single source in the `skills/` directory of the repository and copied to the appropriate location during installation.
 
-### Checklists Are Shared
+### Checklists Are Bundled
 
-The `checklists/` directory is platform-independent and used by all platforms. It only needs to be installed once.
+Language-specific security checklists are bundled inside each language skill's `references/` subdirectory (e.g., `sc-lang-go/references/go-security-checklist.md`). They are installed automatically with the skill.
 
 ---
 
@@ -533,20 +464,6 @@ ls -la AGENTS.md .agents/skills/
 3. Language-specific skills were not activated because the language was not detected
 
 **Solution:** Check `security-report/architecture.md` to see which languages were detected. If a language is missing, verify that its source files are present and have standard file extensions. You can also request a specific skill to run: "run only sc-lang-python."
-
-### Checklists Not Found
-
-**Symptom:** Language skills report that they cannot find the checklist file.
-
-**Possible cause:** The `checklists/` directory was not copied or is not in the project root.
-
-**Solution:**
-```bash
-ls checklists/
-# Should show: go-security-checklist.md, typescript-security-checklist.md, etc.
-```
-
-If missing, copy the checklists directory from the security-check repository.
 
 ### Large Project Performance
 

@@ -12,7 +12,7 @@ Thank you for your interest in contributing to security-check! This guide will h
 
 ### Adding a New Vulnerability Skill
 
-1. Copy `templates/SKILL_TEMPLATE.md` to `scan-target/.claude/skills/sc-{skill-name}.md`
+1. Create a new folder `skills/sc-{skill-name}/` with a `SKILL.md` file (use `templates/SKILL_TEMPLATE.md` as the starting point)
 2. Follow the skill writing standard documented in the template
 3. Ensure your skill has:
    - Clear Phase 1 (Discovery) with specific file patterns and grep patterns
@@ -20,18 +20,16 @@ Thank you for your interest in contributing to security-check! This guide will h
    - Accurate CWE references
    - At least 3 vulnerable/safe code examples per language
    - A "Common False Positives" section
-4. Copy the skill to `scan-target/.agents/skills/` as well
-5. Update `scan-target/CLAUDE.md` and `scan-target/AGENTS.md` to reference your skill
-6. Submit a pull request
+4. Update `scan-target/CLAUDE.md` and `scan-target/AGENTS.md` to reference your skill
+5. Submit a pull request
 
 ### Adding a New Language Skill
 
-1. Copy `templates/LANG_SKILL_TEMPLATE.md` to `scan-target/.claude/skills/sc-lang-{language}.md`
-2. Create a matching checklist at `checklists/{language}-security-checklist.md` using `templates/CHECKLIST_TEMPLATE.md`
+1. Create a new folder `skills/sc-lang-{language}/` with a `SKILL.md` file (use `templates/LANG_SKILL_TEMPLATE.md`)
+2. Create a matching checklist at `skills/sc-lang-{language}/references/{language}-security-checklist.md` using `templates/CHECKLIST_TEMPLATE.md`
 3. The checklist must contain at least 400 unique security check items
 4. Each item must have a unique ID, description, severity, and CWE reference
-5. Copy the skill to `scan-target/.agents/skills/`
-6. Submit a pull request
+5. Submit a pull request
 
 ### Improving Existing Skills
 
