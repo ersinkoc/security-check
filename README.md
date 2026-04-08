@@ -34,21 +34,34 @@ Traditional static analysis tools rely on hardcoded rules and pattern matching. 
 
 ### Option 1: Automated Installation
 
+**macOS / Linux:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ersinkoc/security-check/main/install.sh | bash
 ```
 
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/ersinkoc/security-check/main/install.ps1 | iex
+```
+
 ### Option 2: Manual Installation
 
+**macOS / Linux:**
 ```bash
-# Clone the repository
 git clone https://github.com/ersinkoc/security-check.git
-
-# Copy scan-target contents into your project
 cp -r security-check/scan-target/* /path/to/your/project/
 cp -r security-check/scan-target/.claude /path/to/your/project/
 cp -r security-check/scan-target/.agents /path/to/your/project/
 cp -r security-check/checklists /path/to/your/project/
+```
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/ersinkoc/security-check.git
+Copy-Item -Recurse security-check\scan-target\* \path\to\your\project\
+Copy-Item -Recurse security-check\scan-target\.claude \path\to\your\project\
+Copy-Item -Recurse security-check\scan-target\.agents \path\to\your\project\
+Copy-Item -Recurse security-check\checklists \path\to\your\project\
 ```
 
 ### Option 3: Direct Copy
