@@ -53,12 +53,12 @@ Before starting any scan:
 
 Run these skills sequentially, as later skills depend on recon output:
 
-1. **sc-recon** (`.claude/skills/sc-recon.md`)
+1. **sc-recon** (`.claude/skills/sc-recon/SKILL.md`)
    - Discovers technology stack, architecture, entry points, data flows
    - Produces: `security-report/architecture.md`
    - Extracts detected languages list for Step 2
 
-2. **sc-dependency-audit** (`.claude/skills/sc-dependency-audit.md`)
+2. **sc-dependency-audit** (`.claude/skills/sc-dependency-audit/SKILL.md`)
    - Analyzes lock files, supply chain risks, known CVE patterns
    - Produces: `security-report/dependency-audit.md`
 
@@ -72,31 +72,31 @@ Run vulnerability scanning skills **in parallel** based on detected languages an
 
 | Language | Skill | File |
 |----------|-------|------|
-| JavaScript/TypeScript | sc-lang-js | `.claude/skills/sc-lang-js.md` |
-| Python | sc-lang-python | `.claude/skills/sc-lang-python.md` |
-| Go | sc-lang-go | `.claude/skills/sc-lang-go.md` |
-| Rust | sc-lang-rust | `.claude/skills/sc-lang-rust.md` |
-| Java/Kotlin | sc-lang-java | `.claude/skills/sc-lang-java.md` |
-| C/C++ | sc-lang-c | `.claude/skills/sc-lang-c.md` |
-| PHP | sc-lang-php | `.claude/skills/sc-lang-php.md` |
-| Ruby | sc-lang-ruby | `.claude/skills/sc-lang-ruby.md` |
-| C#/.NET | sc-lang-csharp | `.claude/skills/sc-lang-csharp.md` |
-| Swift | sc-lang-swift | `.claude/skills/sc-lang-swift.md` |
+| JavaScript/TypeScript | sc-lang-js | `.claude/skills/sc-lang-js/SKILL.md` |
+| Python | sc-lang-python | `.claude/skills/sc-lang-python/SKILL.md` |
+| Go | sc-lang-go | `.claude/skills/sc-lang-go/SKILL.md` |
+| Rust | sc-lang-rust | `.claude/skills/sc-lang-rust/SKILL.md` |
+| Java/Kotlin | sc-lang-java | `.claude/skills/sc-lang-java/SKILL.md` |
+| C/C++ | sc-lang-c | `.claude/skills/sc-lang-c/SKILL.md` |
+| PHP | sc-lang-php | `.claude/skills/sc-lang-php/SKILL.md` |
+| Ruby | sc-lang-ruby | `.claude/skills/sc-lang-ruby/SKILL.md` |
+| C#/.NET | sc-lang-csharp | `.claude/skills/sc-lang-csharp/SKILL.md` |
+| Swift | sc-lang-swift | `.claude/skills/sc-lang-swift/SKILL.md` |
 
 #### Category Skills (always run relevant ones):
 
 | Category | Skill | File |
 |----------|-------|------|
-| Web Security | sc-web | `.claude/skills/sc-web.md` |
-| API Security | sc-api | `.claude/skills/sc-api.md` |
-| Authentication | sc-auth | `.claude/skills/sc-auth.md` |
-| Cryptography | sc-crypto | `.claude/skills/sc-crypto.md` |
-| Infrastructure | sc-infra | `.claude/skills/sc-infra.md` |
-| Secrets Detection | sc-secrets | `.claude/skills/sc-secrets.md` |
-| Configuration | sc-config | `.claude/skills/sc-config.md` |
-| Input Validation | sc-input-validation | `.claude/skills/sc-input-validation.md` |
-| Access Control | sc-access-control | `.claude/skills/sc-access-control.md` |
-| Data Protection | sc-data-protection | `.claude/skills/sc-data-protection.md` |
+| Web Security | sc-web | `.claude/skills/sc-web/SKILL.md` |
+| API Security | sc-api | `.claude/skills/sc-api/SKILL.md` |
+| Authentication | sc-auth | `.claude/skills/sc-auth/SKILL.md` |
+| Cryptography | sc-crypto | `.claude/skills/sc-crypto/SKILL.md` |
+| Infrastructure | sc-infra | `.claude/skills/sc-infra/SKILL.md` |
+| Secrets Detection | sc-secrets | `.claude/skills/sc-secrets/SKILL.md` |
+| Configuration | sc-config | `.claude/skills/sc-config/SKILL.md` |
+| Input Validation | sc-input-validation | `.claude/skills/sc-input-validation/SKILL.md` |
+| Access Control | sc-access-control | `.claude/skills/sc-access-control/SKILL.md` |
+| Data Protection | sc-data-protection | `.claude/skills/sc-data-protection/SKILL.md` |
 
 Each skill produces a findings file: `security-report/findings/<skill-name>.json`
 
@@ -129,7 +129,7 @@ Findings JSON schema:
 
 After all Step 2 skills complete:
 
-1. **sc-verifier** (`.claude/skills/sc-verifier.md`)
+1. **sc-verifier** (`.claude/skills/sc-verifier/SKILL.md`)
    - Reads all findings from `security-report/findings/`
    - Eliminates false positives via reachability analysis
    - Checks for framework protections and sanitization
@@ -141,7 +141,7 @@ After all Step 2 skills complete:
 
 After verification completes:
 
-1. **sc-report** (`.claude/skills/sc-report.md`)
+1. **sc-report** (`.claude/skills/sc-report/SKILL.md`)
    - Reads verified findings and all intermediate artifacts
    - Produces: `security-report/SECURITY-REPORT.md`
    - Includes executive summary, detailed findings, remediation roadmap
@@ -153,7 +153,7 @@ After verification completes:
 
 For diff/PR scans, use a streamlined pipeline:
 
-1. **sc-diff-report** (`.claude/skills/sc-diff-report.md`)
+1. **sc-diff-report** (`.claude/skills/sc-diff-report/SKILL.md`)
    - Extracts git diff (staged, unstaged, or between branches)
    - Filters changed files only
    - Runs targeted vulnerability skills on changed code
