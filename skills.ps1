@@ -17,7 +17,7 @@
 [CmdletBinding()]
 param(
     [Parameter(ValueFromRemainingArguments)]
-    [string[]]$Args
+    [string[]]$SkillArgs
 )
 
 $ErrorActionPreference = 'Stop'
@@ -185,7 +185,7 @@ function Main {
         Write-Host '  Warning: Not in a git repository root. Proceeding anyway...' -ForegroundColor Yellow
     }
 
-    $skills = Resolve-SkillList -Arguments $Args
+    $skills = Resolve-SkillList -Arguments $SkillArgs
 
     # Download
     Write-Host '  [1/3] Downloading security-check skills...' -ForegroundColor Cyan

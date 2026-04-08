@@ -75,10 +75,10 @@ detect_platform() {
     fi
 
     if [ ${#platforms[@]} -eq 0 ]; then
-        echo -e "${YELLOW}  No AI platform detected. Installing for Claude Code + Agents.${NC}"
+        echo -e "${YELLOW}  No AI platform detected. Installing for Claude Code + Agents.${NC}" >&2
         platforms+=("claude" "agents")
     else
-        echo -e "${GREEN}  Detected platforms: ${platforms[*]}${NC}"
+        echo -e "${GREEN}  Detected platforms: ${platforms[*]}${NC}" >&2
     fi
 
     echo "${platforms[@]}"
@@ -133,7 +133,7 @@ resolve_skills() {
                         api)       selected="$selected $API_SKILLS" ;;
                         infra)     selected="$selected $INFRA_SKILLS" ;;
                         lang)      selected="$selected $LANG_SKILLS" ;;
-                        *) echo -e "${RED}  Unknown category: $1${NC}"; exit 1 ;;
+                        *) echo -e "${RED}  Unknown category: $1${NC}" >&2; exit 1 ;;
                     esac
                     shift
                 done
@@ -149,7 +149,7 @@ resolve_skills() {
                         rs|rust)    selected="$selected sc-lang-rust" ;;
                         java|kotlin) selected="$selected sc-lang-java" ;;
                         cs|csharp|dotnet) selected="$selected sc-lang-csharp" ;;
-                        *) echo -e "${RED}  Unknown language: $1${NC}"; exit 1 ;;
+                        *) echo -e "${RED}  Unknown language: $1${NC}" >&2; exit 1 ;;
                     esac
                     shift
                 done
@@ -171,8 +171,8 @@ resolve_skills() {
                 exit 0
                 ;;
             *)
-                echo -e "${RED}  Unknown option: $1${NC}"
-                echo -e "  Run with ${CYAN}--help${NC} for usage."
+                echo -e "${RED}  Unknown option: $1${NC}" >&2
+                echo -e "  Run with ${CYAN}--help${NC} for usage." >&2
                 exit 1
                 ;;
         esac
@@ -190,8 +190,8 @@ resolve_skills() {
         fi
     done
 
-    # Deduplicate
-    echo "$selected" | tr ' ' '\n' | sort -u | tr '\n' ' '
+    # Deduplicate (filter empty lines)
+    echo "$selected" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' '
 }
 
 download_repo() {
