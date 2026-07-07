@@ -16,6 +16,42 @@ npx skills add ersinkoc/security-check
 
 That's it. Open your AI assistant and say **"run security check"**.
 
+
+---
+
+## ⚡ Sponsored by WrongStack
+
+<div align="center">
+
+### _Built on the wrong stack. Shipped anyway._
+
+**[WrongStack](https://wrongstack.com)** is a terminal-native AI coding agent that reads your code, edits files, runs commands, and reasons through bugs — across a plain REPL, a full-screen TUI, and a browser UI. You keep your hand on every permission.
+
+[![Website](https://img.shields.io/badge/%F0%9F%8C%90_Website-wrongstack.com-6E56CF?style=for-the-badge)](https://wrongstack.com)
+&nbsp;
+[![GitHub](https://img.shields.io/badge/GitHub-wrongstack%2Fwrongstack-181717?style=for-the-badge&logo=github)](https://github.com/wrongstack/wrongstack)
+
+</div>
+
+| | What you get |
+|---|---|
+| 🧠 **~110 LLM providers** | Anthropic, OpenAI, Google, and any OpenAI-compatible endpoint |
+| 🛠️ **36 built-in tools** | Read, edit, search, test, and run shell — every call gated by per-tool permissions |
+| 🖥️ **3 surfaces** | Plain readline REPL · Ink/React TUI (`--tui`) · standalone web UI |
+| 🤖 **Fleet orchestration** | A **Director** coordinates subagents; `eternal` & `parallel` autonomous loops |
+| 📋 **Spec-Driven Development** | Hand it a `PROMPT.md` and let it build the whole project, single-shot |
+| 🔐 **Secure by default** | AES-256-GCM secret storage, per-tool policies, opt-in YOLO mode |
+
+> **🧩 The perfect pairing:** Plan with **Project Architect**, then hand the generated `PROMPT.md` to **WrongStack** for spec-driven, single-shot execution. Architect the *what* and the *how* — WrongStack ships it.
+
+<div align="center">
+
+🔗 **[wrongstack.com](https://wrongstack.com)** &nbsp;·&nbsp; **[github.com/wrongstack/wrongstack](https://github.com/wrongstack/wrongstack)**
+
+</div>
+
+---
+
 ### Alternative Installation
 
 <details>
