@@ -24,7 +24,7 @@ $ErrorActionPreference = 'Stop'
 
 $RepoUrl = 'https://github.com/ersinkoc/security-check'
 $Branch = 'main'
-$Version = '1.1.0'
+$Version = '1.2.0'
 $TempDir = Join-Path ([System.IO.Path]::GetTempPath()) "security-check-$(Get-Random)"
 
 # Skill categories
@@ -39,6 +39,7 @@ $SkillCategories = @{
     logic     = @('sc-business-logic','sc-race-condition','sc-mass-assignment')
     api       = @('sc-api-security','sc-rate-limiting','sc-jwt')
     infra     = @('sc-iac','sc-docker','sc-ci-cd')
+    specialized = @('sc-ai-security','sc-protocol-security','sc-local-ipc')
     lang      = @('sc-lang-go','sc-lang-typescript','sc-lang-python','sc-lang-php','sc-lang-rust','sc-lang-java','sc-lang-csharp')
 }
 
@@ -77,9 +78,10 @@ function Show-Categories {
     Write-Host '  logic      Business logic, race conditions, mass assignment (3 skills)' -ForegroundColor Cyan
     Write-Host '  api        API security, rate limiting, JWT (3 skills)' -ForegroundColor Cyan
     Write-Host '  infra      IaC, Docker, CI/CD (3 skills)' -ForegroundColor Cyan
+    Write-Host '  specialized AI/agents, protocols/messaging, desktop/local IPC (3 skills)' -ForegroundColor Cyan
     Write-Host '  lang       Language-specific: Go, TS, Python, PHP, Rust, Java, C# (7 skills)' -ForegroundColor Cyan
     Write-Host ''
-    Write-Host '  Total: 48 skills' -ForegroundColor White
+    Write-Host '  Total: 51 skills' -ForegroundColor White
     Write-Host ''
     Write-Host '  Usage:' -ForegroundColor DarkGray
     Write-Host '    .\skills.ps1 --all                          Install all skills' -ForegroundColor DarkGray

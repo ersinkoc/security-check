@@ -92,7 +92,7 @@ your-project/
         │   └── SKILL.md
         ├── sc-sqli/
         │   └── SKILL.md
-        ├── ... (48 skill folders)
+        ├── ... (51 skill folders)
         ├── sc-lang-go/
         │   ├── SKILL.md
         │   └── references/

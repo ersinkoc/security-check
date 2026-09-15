@@ -14,6 +14,8 @@ metadata:
 
 Performs a targeted security scan on only the files changed in a git diff, pull request, or recent commit. This enables fast, focused security feedback during code review without the overhead of a full codebase scan. Classifies findings as "new" (introduced by changes) vs "existing" (pre-existing in touched files).
 
+Diff mode is always partial coverage. Apply the evidence contract in `sc-orchestrator`: verify causality against the base revision, independently challenge candidates, and never present unresolved or pre-existing leads as newly introduced vulnerabilities.
+
 ## Activation
 
 Activates when the user issues any of:
@@ -135,6 +137,8 @@ For each finding:
 - A modification removes a security control
 - A configuration change weakens security
 
+Confirm "new" by comparing the complete source-to-sink path and effective controls in both base and head. A changed line near an old root cause is not sufficient.
+
 **Existing finding (pre-existing, found while scanning touched file):**
 - The vulnerable code is in an unchanged line within a modified file
 - The finding exists in surrounding context, not in the diff itself
@@ -151,6 +155,9 @@ Apply a lightweight version of sc-verifier logic:
 3. Framework protection: Does the framework auto-protect against this?
 4. Context: Is this test code or production code?
 5. Confidence scoring (same 0-100 scale)
+6. Trust boundary: name attacker, affected principal/resource, and meaningful result
+7. Causality: prove which changed behavior introduces or restores the boundary failure
+8. Verdict: `confirmed`, `needs_validation`, or `rejected`; only confirmed records receive severity
 
 ## Output Format
 
@@ -211,6 +218,12 @@ Apply a lightweight version of sc-verifier logic:
 
 ## Changed Files Not Scanned
 {List of filtered files with reason (docs, generated, assets)}
+
+## Needs Validation
+{Unresolved source-grounded leads with exact blockers and no severity}
+
+## Coverage Limits
+{Untouched dependencies, call paths, deployment facts, filtered files, and verification limits}
 ```
 
 ## PR Comment Format

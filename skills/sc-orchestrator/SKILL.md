@@ -12,7 +12,15 @@ metadata:
 
 ## Purpose
 
-The orchestrator is the central coordination skill for the security-check pipeline. It manages the execution of all scanning phases, dispatches vulnerability detection skills, tracks progress, aggregates results, and ensures the pipeline runs to completion even when individual skills encounter errors.
+The orchestrator is the central coordination skill for the security-check pipeline. It manages the execution of all scanning phases, dispatches vulnerability detection skills, tracks explicit coverage, aggregates results, and keeps incomplete work visible when individual skills encounter errors.
+
+Apply this evidence contract throughout the pipeline: patterns create candidates, only independently verified trust-boundary failures become confirmed findings, and unavailable decisive facts remain `needs_validation` without severity. The source distribution includes the expanded rationale in `docs/EVIDENCE_MODEL.md`.
+
+## Operating Modes
+
+- **Guidance mode:** security questions, focused reviews, triage, and investigation use only relevant skills and do not automatically create the full report tree.
+- **Full audit mode:** explicit repository audits, penetration tests, comprehensive reviews, or requested report artifacts run the complete four-phase pipeline.
+- **Diff mode:** changed-file or PR requests delegate to `sc-diff-report` and disclose their partial scope.
 
 ## Activation
 
@@ -28,12 +36,15 @@ For diff/incremental mode, see `sc-diff-report`.
 
 Before starting a scan:
 
-1. Check if `security-report/` directory exists
-2. If it exists, prompt the user:
-   - **Rescan all**: Delete existing reports and run full scan
-   - **Scan changed files only**: Use diff mode (delegates to `sc-diff-report`)
-3. If it does not exist, create `security-report/` directory
-4. Log scan start time
+1. Resolve the repository root, source ref, requested scope, scan profile, output directory, and any time or agent budget.
+2. Check whether `security-report/` exists. Preserve prior artifacts by default; archive or replace them only with user authorization.
+3. Read compatible prior coverage and findings. Revalidate changed source and carry forward only evidence whose relevant source and conditions still hold.
+4. Create `security-report/`, `security-report/findings/`, and scan state only for a full audit.
+5. Record start time, source ref, scope, execution limits, prior-run inputs, and status.
+
+### Safe Execution Boundary
+
+Source inspection is read-only. Target-controlled builds, tests, processes, parsers, browsers, emulators, or fuzzers may run only with no external network, an allowlisted credential-free environment, scratch-only writes, dummy data, and explicit resource/time limits. Never probe live services, publish artifacts, consume paid quota, or mutate shared infrastructure. If these controls are unavailable, continue source review and record the blocked runtime fact as `needs_validation`.
 
 ## Phase 1: Reconnaissance
 
@@ -42,11 +53,14 @@ Execute these skills sequentially:
 ### 1a. Architecture Mapping (sc-recon)
 - Invoke the `sc-recon` skill
 - Output: `security-report/architecture.md`
+- Output: `security-report/coverage-ledger.md`
 - Extract from output:
   - `detected_languages`: list of programming languages found
   - `detected_frameworks`: list of frameworks found
   - `application_type`: web app, API, CLI, library, etc.
   - `entry_points`: HTTP routes, CLI commands, etc.
+  - `trust_boundaries`: lower-trust principals, protected resources, and controls
+  - `coverage_units`: material surface × boundary × subsystem × attack-class combinations
 
 ### 1b. Dependency Audit (sc-dependency-audit)
 - Invoke the `sc-dependency-audit` skill
@@ -71,7 +85,7 @@ Based on `detected_languages` from Phase 1, activate the appropriate skills.
 
 ### Universal Vulnerability Skills (always activate)
 
-Launch ALL of the following skills as parallel subagents. Each skill runs independently and writes its results to `security-report/{skill-name}-results.md`.
+Launch all applicable skills, in parallel when the host supports it. Each skill runs independently and writes only its own candidate JSON under `security-report/findings/`.
 
 **Injection Attacks:**
 - sc-sqli — SQL Injection
@@ -126,21 +140,28 @@ Launch ALL of the following skills as parallel subagents. Each skill runs indepe
 - sc-docker — Docker Security (if Dockerfile/docker-compose found)
 - sc-ci-cd — CI/CD Security (if .github/workflows or .gitlab-ci.yml found)
 
+**Specialized surfaces (activate only when reconnaissance finds the boundary):**
+- sc-ai-security — LLM context, RAG, memory, tools, MCP, and agent delegation
+- sc-protocol-security — RPC, brokers, queues, webhooks, streaming, and message lifecycle
+- sc-local-ipc — Desktop/mobile bridges, deep links, local IPC, helpers, installers, and updaters
+
 ### Subagent Execution Rules
 
 1. Each subagent runs two internal phases: **Discovery** then **Verification**
-2. Each subagent writes results to `security-report/{skill-name}-results.md`
-3. If a skill finds no issues, it writes a short file: `"No issues found by {skill-name}."`
-4. If a skill encounters an error, log the error and continue with remaining skills
-5. Maximum parallel subagents: limited by the host AI assistant's capability
-6. Track completion: mark each skill as done when its result file is written
+2. Each hunter writes only its own `security-report/findings/{skill-name}.json`; the orchestrator alone updates shared scan state and the coverage ledger.
+3. Each candidate identifies the attacker, entry, ordered source trace, control analysis, sink/resource, affected principal, meaningful result, conditions, and proposed verdict.
+4. A clean skill result still records reviewed paths and concrete checks against its assigned coverage units.
+5. If a skill encounters an error, log the error, mark its units blocked or deferred with reasons, and continue.
+6. Maximum parallel subagents: limited by the host AI assistant's capability. Sequential execution is valid when delegation is unavailable.
+7. Track completion only after its evidence is reflected in the coverage ledger.
+8. After the first wave, run a coverage-critic pass for missed entry surfaces, alternate routes, lifecycle paths, wildcard issues, and uncovered units. Reassign material gaps when resources permit.
 
 ## Phase 3: Verification
 
 After all Phase 2 skills complete:
 
-1. Invoke the `sc-verifier` skill
-2. Input: all `security-report/*-results.md` files
+1. Invoke the `sc-verifier` skill in a separate pass. When supported, use a verifier that did not produce the candidate.
+2. Input: all `security-report/findings/*.json` files plus architecture and coverage artifacts
 3. The verifier performs:
    - Reachability analysis
    - Sanitization verification
@@ -148,18 +169,23 @@ After all Phase 2 skills complete:
    - Context analysis (test code, dead code, examples)
    - Duplicate detection and merging
    - Confidence scoring (0-100 per finding)
-4. Output: `security-report/verified-findings.md`
+4. Require the verifier to try to disprove every candidate and assign one verdict: `confirmed`, `needs_validation`, or `rejected`.
+5. Output: `security-report/findings.json` and `security-report/verified-findings.md`.
+6. Severity is assigned only to `confirmed` findings and is based on demonstrated impact and conditions, not checklist deviation.
 
 ## Phase 4: Reporting
 
 After verification completes:
 
 1. Invoke the `sc-report` skill
-2. Input: `security-report/verified-findings.md`
+2. Input: `security-report/findings.json`, `security-report/verified-findings.md`, and `security-report/coverage-ledger.md`
 3. The report generator produces:
    - Executive summary with risk score
    - Scan statistics
-   - Findings grouped by severity (Critical → High → Medium → Low → Info)
+   - Confirmed findings grouped by severity (Critical → High → Medium → Low)
+   - Separate needs-validation leads without severity
+   - Separate hardening notes and positive controls
+   - Coverage totals and explicit blocked, deferred, and out-of-scope work
    - CVSS v3.1-style severity for each finding
    - Remediation roadmap (4 phases)
 4. Output: `security-report/SECURITY-REPORT.md`
@@ -169,7 +195,7 @@ After verification completes:
 - If `sc-recon` fails: abort scan, report error to user
 - If `sc-dependency-audit` fails: continue without dependency data, note in report
 - If any Phase 2 skill fails: log error, continue with remaining skills
-- If `sc-verifier` fails: skip verification, use raw findings in report (note: unverified)
+- If `sc-verifier` fails: do not publish raw candidates as vulnerabilities; mark the run incomplete and retain them as unverified candidates
 - If `sc-report` fails: output raw verified-findings.md as the report
 
 ## Progress Reporting
@@ -189,11 +215,13 @@ During execution, report progress to the user at these milestones:
 ```
 security-report/
 ├── architecture.md              # Phase 1: Codebase architecture map
+├── coverage-ledger.md           # Phase 1-4: Explicit coverage and gaps
 ├── dependency-audit.md          # Phase 1: Dependency analysis
-├── sc-sqli-results.md           # Phase 2: Per-skill results
-├── sc-xss-results.md            #   ...
-├── sc-rce-results.md            #   ...
-├── ...                          #   (one file per skill)
-├── verified-findings.md         # Phase 3: Verified findings
+├── findings/                    # Phase 2: Per-skill candidate JSON
+│   ├── sc-sqli.json
+│   ├── sc-xss.json
+│   └── ...
+├── findings.json                # Phase 3: Final structured verdicts
+├── verified-findings.md         # Phase 3: Human-readable verification record
 └── SECURITY-REPORT.md           # Phase 4: Final report
 ```

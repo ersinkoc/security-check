@@ -30,6 +30,8 @@ When the user says any of the following, begin a diff-mode scan:
 
 ## Full Scan Pipeline (4 Phases)
 
+Apply `.agents/skills/sc-orchestrator/SKILL.md` and its evidence contract. A pattern is a candidate, not a vulnerability. Confirm only a complete, meaningful trust-boundary failure after a separate adversarial verification pass. Use `needs_validation` without severity when a decisive runtime or deployment fact is unavailable. Record defense-in-depth gaps as hardening notes.
+
 ### Step 0: Pre-Check
 
 Before starting any scan:
@@ -52,6 +54,8 @@ Before starting any scan:
    }
    ```
 
+Do not run target-controlled code against live services or shared infrastructure. Local execution requires no external network, a credential-free allowlisted environment, scratch-only writes, dummy data, and bounded resources. Otherwise perform source review and record the missing validation capability.
+
 ### Step 1: Reconnaissance
 
 Run these skills sequentially, as later skills depend on recon output:
@@ -59,6 +63,7 @@ Run these skills sequentially, as later skills depend on recon output:
 1. **sc-recon** (`.agents/skills/sc-recon/SKILL.md`)
    - Discovers technology stack, architecture, entry points, data flows
    - Produces: `security-report/architecture.md`
+   - Produces: `security-report/coverage-ledger.md`
    - Extracts detected languages list for Step 2
 
 2. **sc-dependency-audit** (`.agents/skills/sc-dependency-audit/SKILL.md`)
@@ -158,7 +163,15 @@ Run vulnerability scanning skills **in parallel** based on detected languages an
 | Docker Security | sc-docker | `.agents/skills/sc-docker/SKILL.md` |
 | CI/CD Security | sc-ci-cd | `.agents/skills/sc-ci-cd/SKILL.md` |
 
-Each skill produces a findings file: `security-report/findings/<skill-name>.json`
+#### Specialized Surface Skills — run when reconnaissance finds the boundary:
+
+| Category | Skill | File |
+|----------|-------|------|
+| AI / LLM / Agents / MCP | sc-ai-security | `.agents/skills/sc-ai-security/SKILL.md` |
+| Protocols / RPC / Messaging | sc-protocol-security | `.agents/skills/sc-protocol-security/SKILL.md` |
+| Desktop / Mobile / Local IPC | sc-local-ipc | `.agents/skills/sc-local-ipc/SKILL.md` |
+
+Each skill produces a candidate file: `security-report/findings/<skill-name>.json`. The orchestrator alone updates shared state and the coverage ledger. A clean result still records reviewed paths and concrete checks for its assigned coverage units.
 
 Findings JSON schema:
 ```json
@@ -169,7 +182,7 @@ Findings JSON schema:
     {
       "id": "<skill>-<NNN>",
       "title": "...",
-      "severity": "critical|high|medium|low|info",
+      "severity": "critical|high|medium|low|null",
       "category": "...",
       "file": "...",
       "line": 0,
@@ -179,11 +192,21 @@ Findings JSON schema:
       "remediation": "...",
       "references": ["..."],
       "cwe": "CWE-XXX",
-      "confidence": 0
+      "confidence": 0,
+      "attacker": "...",
+      "affected_principal": "...",
+      "source_trace": ["path/to/file:line"],
+      "control_analysis": "...",
+      "sink": "...",
+      "observed_result": "...",
+      "conditions": ["..."],
+      "proposed_verdict": "confirmed|needs_validation|rejected"
     }
   ]
 }
 ```
+
+Severity is null unless the candidate is independently confirmed in Step 3.
 
 ### Step 3: Verification
 
@@ -196,6 +219,8 @@ After all Step 2 skills complete:
    - Deduplicates findings with same root cause
    - Assigns confidence scores (0-100)
    - Produces: `security-report/verified-findings.md`
+   - Produces: `security-report/findings.json` with separate `confirmed`, `needs_validation`, and `rejected` arrays
+   - Assigns severity only to confirmed findings
 
 ### Step 4: Reporting
 
@@ -222,7 +247,7 @@ For diff/PR scans, use a streamlined pipeline:
 
 ---
 
-## Available Skills - Complete Catalog (48 skills)
+## Available Skills - Complete Catalog (51 skills)
 
 ### Core Pipeline Skills (6)
 - `sc-orchestrator` - Master coordination and state management
@@ -292,6 +317,11 @@ For diff/PR scans, use a streamlined pipeline:
 - `sc-docker` - Docker security (image hardening, secrets in layers)
 - `sc-ci-cd` - CI/CD security (expression injection, pull_request_target, unpinned actions)
 
+### Specialized Surface Skills (3)
+- `sc-ai-security` - AI/LLM context, RAG, memory, tools, MCP, and agent delegation
+- `sc-protocol-security` - RPC, brokers, queues, webhooks, streams, replay, and message lifecycle
+- `sc-local-ipc` - Desktop/mobile bridges, deep links, local IPC, helpers, installers, and updaters
+
 ---
 
 ## Output Structure
@@ -302,8 +332,10 @@ After a full scan, the `security-report/` folder contains:
 security-report/
   .scan-state.json          # Scan metadata and progress
   architecture.md           # From sc-recon
+  coverage-ledger.md        # Explicit coverage units, evidence, and gaps
   dependency-audit.md       # From sc-dependency-audit
   verified-findings.md      # From sc-verifier
+  findings.json             # Final confirmed/needs_validation/rejected verdicts
   SECURITY-REPORT.md        # Final report from sc-report
   findings/                 # Raw findings from each skill
     sc-sqli.json
@@ -321,4 +353,7 @@ security-report/
 - Treat test files, examples, and vendor directories with lower priority but still scan them.
 - If a skill fails, log the failure in `.scan-state.json` and continue with remaining skills.
 - The scan should be idempotent: running it twice produces the same results.
+- Prior reports are inputs, not timeless truth: revalidate changed source and keep old gaps visible.
+- A scoped, interrupted, or budget-limited scan must disclose partial coverage.
+- Zero confirmed findings means only that reviewed coverage produced none; it is not proof that the repository is secure.
 - Respect .gitignore patterns for vendor/third-party code but flag if node_modules or similar contain suspicious files.

@@ -79,7 +79,7 @@ security-check includes a dedicated verification phase (Phase 3, `sc-verifier`) 
 - Framework protections (does the framework automatically mitigate this?)
 - Context (is this test code, dead code, or an example?)
 
-Findings that survive verification receive a confidence score (0-100). Findings scored below 30 are marked as "Low Confidence" and placed in the Informational section of the report.
+Candidates receive a confidence score (0-100) to prioritize review, but confidence does not determine the verdict by itself. A candidate is confirmed only when the evidence contract is complete; otherwise it is rejected or retained as an unscored `needs_validation` lead.
 
 If you still encounter false positives:
 1. Check the confidence score -- low scores indicate uncertain findings
@@ -90,11 +90,11 @@ If you still encounter false positives:
 
 | Score | Meaning |
 |-------|---------|
-| 90-100 | Confirmed vulnerability, directly exploitable |
+| 90-100 | Very high evidence strength; still subject to the verdict gate |
 | 70-89 | High probability, likely real but may need specific conditions |
 | 50-69 | Probable vulnerability, recommend manual verification |
 | 30-49 | Possible risk, significant chance of false positive |
-| 0-29 | Low confidence, informational only |
+| 0-29 | Low confidence; reject or retain as an unscored validation lead |
 
 ### 10. Where are the scan results stored?
 
@@ -103,8 +103,10 @@ All scan results are written to a `security-report/` directory in your project r
 | File | Content |
 |------|---------|
 | `architecture.md` | Codebase architecture map from reconnaissance |
+| `coverage-ledger.md` | Reviewed coverage units, evidence, and explicit gaps |
 | `dependency-audit.md` | Supply chain and dependency analysis |
-| `*-results.md` | Raw findings from each vulnerability skill |
+| `findings/*.json` | Raw candidates from each vulnerability skill |
+| `findings.json` | Final confirmed, needs-validation, and rejected verdicts |
 | `verified-findings.md` | Findings after false positive elimination |
 | `SECURITY-REPORT.md` | Final consolidated security report |
 | `diff-report.md` | Incremental scan report (diff mode only) |

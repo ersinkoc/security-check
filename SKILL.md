@@ -1,18 +1,19 @@
 ---
 name: security-check
 description: >
-  Comprehensive AI-powered security scanning suite with 48 skills covering OWASP Top 10,
+  Comprehensive AI-powered security scanning suite with 51 skills covering OWASP Top 10,
   7 language-specific deep scanners (Go, TypeScript, Python, PHP, Rust, Java, C#),
   supply chain analysis, infrastructure-as-code scanning, and 3000+ checklist items.
   Use when you need to run a security audit, find vulnerabilities, scan a PR for security issues,
-  or perform a penetration test on a codebase.
+  or perform an authorized penetration test on a codebase. Full audits use evidence-led
+  coverage tracking and independent candidate verification.
 license: MIT
 compatibility: Works with Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Windsurf, Roo Code, Amp, and all agentskills.io compatible agents
 metadata:
   author: ersinkoc
   organization: ECOSTACK TECHNOLOGY OU
   category: security
-  version: "1.1.0"
+  version: "1.2.0"
   homepage: https://github.com/ersinkoc/security-check
   keywords: security vulnerability-scanning owasp sast code-review
 ---
@@ -37,7 +38,7 @@ After installation, open your AI assistant and say:
 
 ## What's Included
 
-### 48 Security Skills
+### 51 Security Skills
 
 | Category | Count | Skills |
 |----------|-------|--------|
@@ -52,6 +53,7 @@ After installation, open your AI assistant and say:
 | API Security | 3 | API Security, Rate Limiting, JWT |
 | Infrastructure | 3 | IaC, Docker, CI/CD |
 | Language Scanners | 7 | Go, TypeScript, Python, PHP, Rust, Java, C# |
+| Specialized Surfaces | 3 | AI & Agents, Protocols & Messaging, Desktop & Local IPC |
 
 ### 10 Security Checklists (3000+ items)
 
@@ -66,6 +68,14 @@ Phase 3: VERIFY       → False positive elimination, confidence scoring
 Phase 4: REPORT       → CVSS severity, remediation roadmap
 ```
 
+Every full audit also maintains a coverage ledger. A suspicious pattern is only a
+candidate until a separate verification pass establishes a real trust-boundary failure
+and meaningful impact. Unresolved runtime or deployment facts are reported as
+`needs_validation` without severity; missing defense in depth is a hardening note.
+
+Read [docs/EVIDENCE_MODEL.md](docs/EVIDENCE_MODEL.md) for the shared evidence,
+coverage, safe-validation, and reporting contract.
+
 ## Output
 
 After scanning, a `security-report/` directory is created containing:
@@ -74,6 +84,8 @@ After scanning, a `security-report/` directory is created containing:
 - `architecture.md` — Codebase architecture map
 - `dependency-audit.md` — Supply chain analysis
 - `verified-findings.md` — Findings after false positive elimination
+- `coverage-ledger.md` — Covered, candidate, blocked, deferred, and excluded audit units
+- `findings.json` — Final `confirmed`, `needs_validation`, and `rejected` records
 
 ## More Information
 

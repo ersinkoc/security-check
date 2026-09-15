@@ -12,7 +12,9 @@ metadata:
 
 ## Purpose
 
-The verifier skill processes all raw findings from Phase 2 vulnerability skills, eliminates false positives through multi-criteria analysis, assigns confidence scores, merges duplicate findings, and produces a curated list of verified security issues. This is the quality gate that ensures the final report contains actionable, high-signal findings.
+The verifier skill processes all raw candidates from Phase 2, tries to disprove them, merges duplicate root causes, and assigns explicit final verdicts. This is the quality gate that prevents suspicious patterns, missing hardening, and unresolved deployment assumptions from being presented as vulnerabilities.
+
+Apply the evidence contract in `sc-orchestrator`. When the host supports independent agents, the final verifier must not be the hunter that proposed the candidate. Otherwise use a fresh, separate verification pass and disclose the limitation.
 
 ## Activation
 
@@ -20,20 +22,34 @@ Runs in Phase 3 of the pipeline, after all Phase 2 vulnerability skills have com
 
 ## Input
 
-All files matching `security-report/*-results.md`
+- All files matching `security-report/findings/*.json`
+- `security-report/architecture.md`
+- `security-report/coverage-ledger.md`
 
 ## Output
 
-File: `security-report/verified-findings.md`
+- `security-report/findings.json` — structured final verdicts
+- `security-report/verified-findings.md` — human-readable verification record
+
+## Verdict Gate
+
+Every candidate receives exactly one verdict:
+
+- `confirmed`: complete source trace plus safe bounded evidence establish a meaningful trust-boundary failure. Severity is required.
+- `needs_validation`: a specific runtime, provider, identity, OS, broker, or deployment fact remains decisive. Severity is forbidden; include the exact blocker and safe next check.
+- `rejected`: reachability, controls, authority, context, or reproduction disproves the claim. Severity is forbidden; include the rejection reason.
+
+Confidence may prioritize review but cannot fill a missing evidence field or promote a lead.
 
 ## Verification Process
 
 ### Step 1: Finding Collection
 
-1. Read all `*-results.md` files from `security-report/`
+1. Read all candidate JSON files from `security-report/findings/`
 2. Parse each finding into a structured format (title, severity, confidence, file, line, type, description)
 3. Skip files containing "No issues found"
 4. Create a unified finding list with source skill attribution
+5. Reject malformed candidates that do not identify an attacker, affected principal/resource, ordered source trace, control analysis, sink, result, and conditions
 
 ### Step 2: Reachability Analysis
 
@@ -108,7 +124,7 @@ Determine the context of the vulnerable code:
 **Test code:**
 - File is in `test/`, `tests/`, `__tests__/`, `spec/`, `*_test.go`, `*_test.py`, `*.test.ts`
 - File name contains `test`, `spec`, `mock`, `fixture`
-- Finding in test code: -50 confidence (but keep as informational if it demonstrates a pattern)
+- Finding in test code: -50 confidence (retain a non-production pattern only as an unscored hardening note)
 
 **Dead code:**
 - Function is never called from any reachable path
@@ -164,20 +180,34 @@ final_confidence = base_confidence
 **Clamp to 0-100 range.**
 
 **Confidence classification:**
-- 90-100: **Confirmed** — Directly exploitable, high certainty
+- 90-100: **Very High** — Strong evidence, still subject to the verdict gate
 - 70-89: **High Probability** — Very likely vulnerable, minor conditions may apply
 - 50-69: **Probable** — Likely vulnerable, additional manual verification recommended
 - 30-49: **Possible** — May be a false positive, requires manual review
-- 0-29: **Low Confidence** — Likely informational, marked as such in report
+- 0-29: **Low Confidence** — Reject or retain as an unscored validation lead
 
 ### Step 9: Severity Recalculation
 
-After confidence scoring, recalculate severity:
+After confidence scoring, recalculate severity only for records that pass the `confirmed` verdict gate:
 
-- Findings with confidence < 30: downgrade severity to "Info" regardless of original rating
+- Findings with confidence < 30: move to `needs_validation` or `rejected`; do not assign severity
 - Findings with confidence 30-49: cap severity at "Medium"
 - Findings with confidence 50-69: cap severity at "High"
 - Findings with confidence 70+: keep original severity
+
+### Step 10: Adversarial Disposition
+
+For every surviving candidate, answer these questions from current evidence:
+
+1. Can the claimed lower-trust actor reach the entry point under stated conditions?
+2. Does the exact attacker-controlled value or state reach the final sensitive sink?
+3. Do framework, middleware, operating-system, deployment, or provider controls stop it?
+4. Is authorization bound to the final principal, action, and resource?
+5. Does the actor already possess equivalent authority by design?
+6. Is there a meaningful confidentiality, integrity, availability, or operator-cost result?
+7. Was any local validation bounded, credential-free, isolated, and non-destructive?
+
+Then assign `confirmed`, `needs_validation`, or `rejected`. Deduplicate by root cause and boundary, not merely CWE, title, or nearby line numbers.
 
 ## Output Format
 
@@ -191,7 +221,7 @@ After confidence scoring, recalculate severity:
 - Final verified findings: {N}
 
 ## Confidence Distribution
-- Confirmed (90-100): {N}
+- Very High (90-100): {N}
 - High Probability (70-89): {N}
 - Probable (50-69): {N}
 - Possible (30-49): {N}
@@ -200,7 +230,7 @@ After confidence scoring, recalculate severity:
 ## Verified Findings
 
 ### VULN-001: {Title}
-- **Severity:** Critical | High | Medium | Low | Info
+- **Severity:** Critical | High | Medium | Low (confirmed only)
 - **Confidence:** {score}/100 ({classification})
 - **Original Skill:** {skill-name}
 - **Vulnerability Type:** CWE-XXX
@@ -215,6 +245,27 @@ After confidence scoring, recalculate severity:
 ## Eliminated Findings (False Positives)
 Brief list of eliminated findings with reason for elimination.
 ```
+
+Also write `findings.json`:
+
+```json
+{
+  "run_status": "complete",
+  "confirmed": [],
+  "needs_validation": [],
+  "rejected": [],
+  "hardening": [],
+  "coverage_summary": {
+    "covered": 0,
+    "candidate": 0,
+    "blocked": 0,
+    "deferred": 0,
+    "out_of_scope": 0
+  }
+}
+```
+
+Set `run_status` to `incomplete` when mandatory coverage or candidate validation remains unresolved. A `needs_validation` record is a valid final disposition, but an unreviewed candidate is not.
 
 ## Common False Positive Patterns
 

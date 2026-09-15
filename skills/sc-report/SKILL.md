@@ -21,6 +21,8 @@ Runs in Phase 4 of the pipeline, after sc-verifier has completed.
 ## Input
 
 - `security-report/verified-findings.md`
+- `security-report/findings.json`
+- `security-report/coverage-ledger.md`
 - `security-report/architecture.md`
 - `security-report/dependency-audit.md`
 
@@ -38,6 +40,9 @@ Read all input files and extract:
 - Dependency audit summary
 - Total files scanned and lines of code (from architecture.md)
 - Skills executed and their individual result counts
+- Final verdicts, explicit coverage gaps, validation limits, and run completeness
+
+Only `confirmed` records may appear in severity sections or risk-score arithmetic. Put `needs_validation` records in a separate unscored section, rejected records in an optional decision appendix, and missing defense-in-depth in hardening notes.
 
 ### 2. CVSS v3.1-Style Severity Mapping
 
@@ -67,38 +72,28 @@ Map each finding to a CVSS-aligned severity level:
 - Open redirect
 
 **Low (CVSS 0.1-3.9):**
-- Missing security headers (clickjacking, CSP)
-- Verbose error messages with limited information
-- Outdated dependencies without known exploitable CVE
-- Best practice violations
-- Informational findings
+- Demonstrated UI redress or header-related boundary failures with narrow impact
+- Error responses that expose limited non-secret internal data to a lower-trust actor
+- Reachable dependency flaws with demonstrated narrow impact
+- Demonstrated narrow-impact boundary failures under restrictive conditions
 
-**Info (CVSS 0.0):**
-- Findings with confidence < 30
-- Positive security observations
-- Recommendations for defense-in-depth
+Items with no demonstrated security impact, positive controls, and defense-in-depth recommendations belong in the unscored hardening section rather than the vulnerability severity table.
 
 ### 3. Risk Score Calculation
 
-Calculate an overall project risk score (1-10):
+Calculate an overall project risk score (0-10) from confirmed findings only:
 
 ```
-risk_score = base_from_findings + modifiers
+risk_score = sum(confirmed finding weights)
 
 Base score from findings:
-- Each Critical finding: +2.0 (max 10)
+- Each Critical finding: +2.0
 - Each High finding: +1.0
 - Each Medium finding: +0.3
 - Each Low finding: +0.1
 
-Modifiers:
-- No authentication controls detected: +1.0
-- No input validation framework: +0.5
-- Outdated framework with known CVEs: +1.0
-- Strong security controls in place: -1.0
-- Good test coverage of security features: -0.5
-
-Clamp to range 1-10.
+Clamp to range 0-10. Put missing controls, positive controls, and test coverage in
+the narrative; do not convert them into risk points without a confirmed boundary failure.
 ```
 
 ### 4. Report Structure
@@ -114,7 +109,7 @@ Generate the report with the following sections:
 
 **Project:** {project name from architecture.md}
 **Date:** {scan date}
-**Scanner:** security-check v1.0.0
+**Scanner:** security-check v1.2.0
 **Risk Score:** {score}/10 ({Critical|High|Medium|Low|Minimal} Risk)
 
 ## Executive Summary
@@ -131,7 +126,6 @@ containing approximately {N} lines of code across {languages}.
 | High | {N} |
 | Medium | {N} |
 | Low | {N} |
-| Info | {N} |
 
 ### Top Risks
 1. {Most critical finding summary}
@@ -157,16 +151,16 @@ containing approximately {N} lines of code across {languages}.
 
 ### Finding Distribution
 
-| Vulnerability Category | Critical | High | Medium | Low | Info |
-|-----------------------|----------|------|--------|-----|------|
-| Injection | | | | | |
-| Authentication | | | | | |
-| Authorization | | | | | |
-| Data Exposure | | | | | |
-| Cryptography | | | | | |
-| Infrastructure | | | | | |
-| Dependencies | | | | | |
-| ... | | | | | |
+| Vulnerability Category | Critical | High | Medium | Low |
+|-----------------------|----------|------|--------|-----|
+| Injection | | | | |
+| Authentication | | | | |
+| Authorization | | | | |
+| Data Exposure | | | | |
+| Cryptography | | | | |
+| Infrastructure | | | | |
+| Dependencies | | | | |
+| ... | | | | |
 ```
 
 #### Section 3: Critical Findings
@@ -216,9 +210,9 @@ For each critical finding, provide full detail:
 
 Same format as Critical but grouped by severity level. For Medium and Low findings, the description can be more concise.
 
-#### Section 7: Informational
+#### Section 7: Hardening and Positive Controls
 
-Brief list of informational findings and positive security observations.
+Brief unscored list of defense-in-depth improvements and positive security observations.
 
 #### Section 8: Remediation Roadmap
 
@@ -255,7 +249,17 @@ Address Low findings and implement defense-in-depth measures.
 | ... | | | |
 ```
 
-#### Section 9: Methodology
+#### Section 9: Needs Validation, Hardening, and Coverage
+
+Report three distinct groups:
+
+1. `NEEDS VALIDATION`: title, source trace, exact blocker, and bounded owner check; no severity.
+2. Hardening and positive controls: improvements that do not represent a demonstrated boundary failure.
+3. Coverage: covered, candidate, blocked, deferred, not-applicable, and out-of-scope totals with important gaps and the coverage-critic result.
+
+If the scan was scoped, budget-limited, interrupted, lacked independent verification, or could not safely execute target code, state that prominently. Zero confirmed findings is not a clean bill of health.
+
+#### Section 10: Methodology
 
 ```markdown
 ## Methodology
@@ -276,7 +280,7 @@ tool that uses large language model reasoning to detect security vulnerabilities
 - Custom business logic flaws may require manual review
 ```
 
-#### Section 10: Disclaimer
+#### Section 11: Disclaimer
 
 ```markdown
 ## Disclaimer
@@ -306,6 +310,8 @@ Generated by security-check — github.com/ersinkoc/security-check
 ## Edge Cases
 
 - **Zero findings:** Generate a report noting the clean scan with recommendations for defense-in-depth
-- **Only informational findings:** Generate a report with a positive security posture assessment
+- **Zero confirmed findings:** Say "no confirmed findings in reviewed coverage" and list remaining coverage and validation limits
+- **Verifier incomplete:** Never promote raw candidates; mark the run incomplete
+- **Only hardening notes:** Generate a report with an evidence-calibrated posture summary and the coverage limits
 - **Hundreds of findings:** Limit detailed descriptions to top 20 critical/high findings; summarize the rest in tables
 - **Missing architecture data:** Note that reconnaissance was incomplete and findings may lack context

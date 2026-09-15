@@ -14,7 +14,7 @@ set -euo pipefail
 REPO_URL="https://github.com/ersinkoc/security-check"
 BRANCH="main"
 TEMP_DIR=$(mktemp -d)
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 # Colors
 RED='\033[0;31m'
@@ -36,9 +36,10 @@ CLIENT_SKILLS="sc-csrf sc-cors sc-clickjacking sc-websocket"
 LOGIC_SKILLS="sc-business-logic sc-race-condition sc-mass-assignment"
 API_SKILLS="sc-api-security sc-rate-limiting sc-jwt"
 INFRA_SKILLS="sc-iac sc-docker sc-ci-cd"
+SPECIALIZED_SKILLS="sc-ai-security sc-protocol-security sc-local-ipc"
 LANG_SKILLS="sc-lang-go sc-lang-typescript sc-lang-python sc-lang-php sc-lang-rust sc-lang-java sc-lang-csharp"
 
-ALL_SKILLS="$CORE_SKILLS $INJECTION_SKILLS $CODE_EXEC_SKILLS $ACCESS_SKILLS $DATA_SKILLS $SERVER_SKILLS $CLIENT_SKILLS $LOGIC_SKILLS $API_SKILLS $INFRA_SKILLS $LANG_SKILLS"
+ALL_SKILLS="$CORE_SKILLS $INJECTION_SKILLS $CODE_EXEC_SKILLS $ACCESS_SKILLS $DATA_SKILLS $SERVER_SKILLS $CLIENT_SKILLS $LOGIC_SKILLS $API_SKILLS $INFRA_SKILLS $SPECIALIZED_SKILLS $LANG_SKILLS"
 
 cleanup() {
     rm -rf "$TEMP_DIR"
@@ -97,9 +98,10 @@ show_categories() {
     echo -e "  ${CYAN}logic${NC}      Business logic, race conditions, mass assignment (3 skills)"
     echo -e "  ${CYAN}api${NC}        API security, rate limiting, JWT (3 skills)"
     echo -e "  ${CYAN}infra${NC}      IaC, Docker, CI/CD (3 skills)"
+    echo -e "  ${CYAN}specialized${NC} AI/agents, protocols/messaging, desktop/local IPC (3 skills)"
     echo -e "  ${CYAN}lang${NC}       Language-specific: Go, TS, Python, PHP, Rust, Java, C# (7 skills)"
     echo ""
-    echo -e "  ${BOLD}Total: 48 skills${NC}"
+    echo -e "  ${BOLD}Total: 51 skills${NC}"
     echo ""
     echo -e "  ${DIM}Usage examples:${NC}"
     echo -e "    ${DIM}Install all:${NC}        skills.sh --all"
@@ -132,6 +134,7 @@ resolve_skills() {
                         logic)     selected="$selected $LOGIC_SKILLS" ;;
                         api)       selected="$selected $API_SKILLS" ;;
                         infra)     selected="$selected $INFRA_SKILLS" ;;
+                        specialized) selected="$selected $SPECIALIZED_SKILLS" ;;
                         lang)      selected="$selected $LANG_SKILLS" ;;
                         *) echo -e "${RED}  Unknown category: $1${NC}" >&2; exit 1 ;;
                     esac
@@ -323,6 +326,21 @@ print_summary() {
 
 main() {
     print_banner
+
+    # Handle informational flags in the parent shell. Calling exit from
+    # resolve_skills only exits its command-substitution subshell.
+    for arg in "$@"; do
+        case "$arg" in
+            --list)
+                show_categories
+                return 0
+                ;;
+            --help|-h)
+                show_categories
+                return 0
+                ;;
+        esac
+    done
 
     if ! command -v git &>/dev/null; then
         echo -e "${RED}  Error: git is required. Install it from https://git-scm.com${NC}"

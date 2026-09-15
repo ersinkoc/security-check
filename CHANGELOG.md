@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-09-15
+
+### Added
+
+- Three specialized scanners for AI/LLM/agent systems, RPC and messaging protocols, and desktop/mobile/local IPC boundaries
+- Evidence and coverage contract with distinct `confirmed`, `needs_validation`, and `rejected` verdicts
+- Coverage ledger, coverage-critic pass, prior-run revalidation, and safe local validation requirements
+- Structured `findings.json` as the final verdict source alongside the human-readable report
+
+### Changed
+
+- Full audits now require a concrete attacker, trust boundary, source trace, affected principal/resource, and meaningful result before confirmation
+- Verification now challenges candidates independently where the host supports it; unverified raw candidates are never promoted when verification fails
+- Reports separate confirmed vulnerabilities, unresolved leads, hardening notes, positive controls, and incomplete coverage
+- Skill catalog and installers now include 51 skills
+
+### Acknowledgement
+
+- Methodology improvements were informed by Cloudflare's MIT-licensed `security-audit-skill` and adapted to security-check's four-phase multi-skill design
+
 ## [1.1.0] - 2026-04-09
 
 ### Changed

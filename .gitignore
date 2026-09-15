@@ -32,3 +32,6 @@ venv/
 
 # Logs
 *.log
+
+.dfmt/
+.claude/settings.json

@@ -53,6 +53,8 @@ The reconnaissance phase maps the entire codebase before any vulnerability hunti
 8. **File Structure Analysis** -- Sensitive file paths, configuration files, environment files, secret stores
 9. **Detected Security Controls** -- CSP headers, CORS policies, CSRF tokens, rate limiters
 10. **Detected Languages** -- This list directly controls which `sc-lang-*` skills activate in Phase 2
+11. **Specialized Surfaces** -- AI/agent, protocol/messaging, and desktop/local IPC boundaries
+12. **Coverage Ledger** -- Stable surface × boundary × subsystem × attack-class units with evidence and gaps
 
 **sc-dependency-audit** produces `dependency-audit.md` containing:
 
@@ -66,7 +68,7 @@ The reconnaissance phase maps the entire codebase before any vulnerability hunti
 ### Phase 2: Vulnerability Hunting
 
 **Skills:** 40+ vulnerability skills + 7 language-specific skills (executed in parallel)
-**Output:** `security-report/{skill-name}-results.md` per skill
+**Output:** `security-report/findings/{skill-name}.json` per skill plus coverage-ledger evidence
 
 This is the main scanning phase. All applicable vulnerability skills run in parallel as independent subagents. Each skill executes its own internal two-step process:
 
@@ -86,17 +88,18 @@ This is the main scanning phase. All applicable vulnerability skills run in para
 | Logic & Design | sc-business-logic, sc-race-condition, sc-mass-assignment |
 | API Security | sc-api-security, sc-rate-limiting, sc-jwt |
 | Infrastructure | sc-iac, sc-docker, sc-ci-cd |
+| Specialized Surfaces | sc-ai-security, sc-protocol-security, sc-local-ipc |
 | Language-Specific | sc-lang-go, sc-lang-typescript, sc-lang-python, sc-lang-php, sc-lang-rust, sc-lang-java, sc-lang-csharp |
 
 Language-specific skills only activate when their language is detected in `architecture.md`. For example, `sc-lang-rust` only runs if Rust source files are found during reconnaissance.
 
-Each skill writes its results to `security-report/{skill-name}-results.md`. If a skill finds no issues, it writes a brief file confirming a clean scan for that category.
+Each skill writes candidates to `security-report/findings/{skill-name}.json`. A skill that finds no candidate still records reviewed paths and checks in `coverage-ledger.md`.
 
 ### Phase 3: Verification
 
 **Skill:** `sc-verifier`
-**Input:** All `*-results.md` files from Phase 2
-**Output:** `security-report/verified-findings.md`
+**Input:** All `findings/*.json` files from Phase 2 plus architecture and coverage artifacts
+**Output:** `security-report/findings.json` and `security-report/verified-findings.md`
 
 The verifier reads every finding from Phase 2 and applies six verification criteria:
 
@@ -107,23 +110,23 @@ The verifier reads every finding from Phase 2 and applies six verification crite
 5. **Context Analysis** -- Is this code in a test file, example directory, documentation, or generated code?
 6. **Duplicate Detection** -- Findings that share the same root cause are merged into a single entry with all affected locations listed.
 
-After verification, each finding receives a confidence score (0-100) and findings below a threshold may be marked as low-confidence or informational.
+After verification, each candidate receives a confidence score and exactly one verdict: `confirmed`, `needs_validation`, or `rejected`. Confidence never substitutes for missing boundary evidence.
 
 ### Phase 4: Reporting
 
 **Skill:** `sc-report`
-**Input:** `security-report/verified-findings.md`
+**Input:** `security-report/findings.json`, `verified-findings.md`, and `coverage-ledger.md`
 **Output:** `security-report/SECURITY-REPORT.md`
 
 The reporter transforms verified findings into a structured security assessment report:
 
-1. **Executive Summary** -- Project name, scan date, total findings by severity, overall risk score (1-10)
+1. **Executive Summary** -- Project name, scan date, total confirmed findings by severity, overall risk score (0-10)
 2. **Scan Statistics** -- Files scanned, lines of code, languages detected, skills executed, finding distribution matrix
 3. **Critical Findings** -- Detailed writeup of each critical-severity finding
 4. **High Findings** -- Detailed writeup of each high-severity finding
 5. **Medium Findings** -- Summary of medium-severity findings
 6. **Low Findings** -- Summary of low-severity findings
-7. **Informational** -- Notes and observations that do not represent direct vulnerabilities
+7. **Hardening and Positive Controls** -- Unscored notes that do not represent demonstrated vulnerabilities
 8. **Remediation Roadmap** -- Prioritized fix plan organized into phases:
    - Immediate: Critical findings
    - Short-term: High findings and quick wins
@@ -223,15 +226,15 @@ dependency-audit.md  ──────────>  Skills use dependency info
 
 Phase 2 Output                    Phase 3 Input
 ─────────────────                 ──────────────
-sc-sqli-results.md   ─┐
-sc-xss-results.md    ─┤
-sc-rce-results.md    ─┼────────>  sc-verifier reads ALL result files,
-sc-auth-results.md   ─┤          cross-references findings, eliminates
-...40+ result files  ─┘          duplicates, assigns confidence scores
+findings/sc-sqli.json ─┐
+findings/sc-xss.json  ─┤
+findings/sc-rce.json  ─┼────────> sc-verifier reads ALL candidate files,
+findings/sc-auth.json ─┤         challenges claims, merges root causes,
+... skill JSON files ──┘         and assigns final verdicts
 
 Phase 3 Output                    Phase 4 Input
 ─────────────────                 ──────────────
-verified-findings.md ──────────>  sc-report reads verified findings,
+findings.json + ledger ────────>  sc-report reads final verdicts and coverage,
                                   classifies by CVSS severity,
                                   generates final report
 ```
@@ -254,51 +257,37 @@ After a complete scan, the `security-report/` directory contains:
 ```
 security-report/
 ├── architecture.md              # Phase 1: Codebase architecture map
+├── coverage-ledger.md           # Phase 1-4: Coverage evidence and gaps
 ├── dependency-audit.md          # Phase 1: Supply chain analysis
-├── sc-sqli-results.md           # Phase 2: SQL injection scan results
-├── sc-xss-results.md            # Phase 2: XSS scan results
-├── sc-rce-results.md            # Phase 2: RCE scan results
-├── sc-auth-results.md           # Phase 2: Authentication scan results
-├── sc-secrets-results.md        # Phase 2: Secrets scan results
-├── sc-lang-python-results.md    # Phase 2: Python-specific scan results
-├── ... (one file per skill)     # Phase 2: Additional skill results
+├── findings/                    # Phase 2: One candidate JSON file per skill
+├── findings.json                # Phase 3: Final structured verdicts
 ├── verified-findings.md         # Phase 3: Verified and scored findings
 ├── SECURITY-REPORT.md           # Phase 4: Final consolidated report
 └── diff-report.md               # (Diff mode only) Incremental scan report
 ```
 
-### Result File Format
+### Candidate File Format
 
-Each Phase 2 result file follows a consistent structure:
+Each Phase 2 candidate file follows a consistent structure:
 
-```markdown
-# {Skill Name} — Scan Results
-
-**Scan Date:** YYYY-MM-DD
-**Skill:** sc-{name}
-**Files Scanned:** N
-**Findings:** N
-
----
-
-## Findings
-
-### Finding: {SKILL}-001
-- **Title:** Short descriptive title
-- **Severity:** Critical | High | Medium | Low
-- **Confidence:** 0-100
-- **File:** path/to/file.ext:line_number
-- **Vulnerability Type:** CWE-XXX
-- **Description:** Detailed explanation
-- **Proof of Concept:** Conceptual exploitation path
-- **Impact:** Consequences of exploitation
-- **Remediation:** How to fix, with code example
-- **References:** CWE/OWASP links
-
----
-
-## No Issues (if clean)
-No {vulnerability type} issues were detected in the scanned codebase.
+```json
+{
+  "skill": "sc-name",
+  "reviewed_paths": ["path/to/file.ext"],
+  "checks": ["source trace or bounded local check"],
+  "candidates": [{
+    "id": "SC-NAME-001",
+    "attacker": "lower-trust principal and starting capability",
+    "affected_principal": "principal or protected resource",
+    "source_trace": ["path/to/file.ext:line"],
+    "control_analysis": "effective controls and gap",
+    "sink": "security-sensitive operation or disclosure",
+    "observed_result": "meaningful boundary result",
+    "conditions": ["required condition"],
+    "proposed_verdict": "confirmed|needs_validation|rejected",
+    "confidence": 0
+  }]
+}
 ```
 
 ### Verified Findings Format
@@ -443,13 +432,13 @@ The verifier adjusts the initial score based on cross-skill analysis:
 
 | Score Range | Classification | Meaning |
 |-------------|---------------|---------|
-| 90-100 | Confirmed | Directly exploitable vulnerability with clear attack path |
+| 90-100 | Very High | Strong evidence; still subject to the verdict gate |
 | 70-89 | High Probability | Very likely a real vulnerability; may require specific conditions |
 | 50-69 | Probable | Likely a vulnerability but needs manual verification |
 | 30-49 | Possible | May be a real issue; significant chance of false positive |
-| 0-29 | Informational | Low confidence; included for awareness but likely not exploitable |
+| 0-29 | Low Confidence | Reject or retain as an unscored validation lead |
 
-Findings with a confidence score below 30 are marked as "Low Confidence" in the final report and placed in the Informational section.
+Confidence prioritizes review. It cannot promote an incomplete candidate or replace the required trust-boundary evidence.
 
 ---
 
@@ -465,7 +454,8 @@ security-check uses a severity classification system inspired by CVSS v3.1 but a
 | High | 7.0 - 8.9 | Orange | Stored XSS, SSRF to internal services, privilege escalation, insecure deserialization, path traversal to sensitive files |
 | Medium | 4.0 - 6.9 | Yellow | Reflected XSS, CSRF, information disclosure, missing security headers, weak cryptography |
 | Low | 0.1 - 3.9 | Blue | Verbose error messages, missing rate limiting on non-sensitive endpoints, minor configuration issues |
-| Info | 0.0 | Gray | Observations, best practice recommendations, code quality notes with security implications |
+
+Observations and defense-in-depth recommendations are unscored hardening notes, not vulnerability severities.
 
 ### Severity Assignment Factors
 

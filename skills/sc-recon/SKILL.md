@@ -20,7 +20,12 @@ First skill executed in Phase 1 of the pipeline. Runs before all other skills.
 
 ## Output
 
-File: `security-report/architecture.md`
+Files:
+
+- `security-report/architecture.md`
+- `security-report/coverage-ledger.md`
+
+Follow the evidence contract in `sc-orchestrator`. Reconnaissance must make coverage and unknowns explicit; an architecture summary alone is not evidence that a boundary was reviewed.
 
 ## Discovery Process
 
@@ -239,9 +244,23 @@ Produce a definitive list of detected languages that determines which `sc-lang-*
 - Python (20% of codebase, scripts/tools only) → activates sc-lang-python
 ```
 
+### 11. Modern Surface Detection
+
+Activate specialized skills from source-visible boundaries, not dependency names alone:
+
+- LLM prompts, RAG, persistent memory, tool calling, MCP, or agent delegation → `sc-ai-security`
+- RPC, schemas, queues, brokers, webhooks, pub/sub, or streaming → `sc-protocol-security`
+- Desktop/mobile apps, deep links, webviews, local IPC, helpers, installers, or updaters → `sc-local-ipc`
+
+### 12. Coverage Ledger
+
+Before hunting, create one stable row per material entry surface, trust boundary, subsystem, and applicable attack class. Each row includes starting paths, status, evidence, and any gap. Seed excluded and unavailable work as `out_of_scope`, `deferred`, or `blocked` rather than silently omitting it.
+
+Use stable, source-derived coverage IDs. Do not include line numbers, wave numbers, agents, verdicts, or severities in identity. Carry prior units forward visibly and revalidate any changed source or condition.
+
 ## Output Format
 
-The output file `security-report/architecture.md` must contain all 10 sections above with concrete findings specific to the scanned codebase. Each section should include file paths and line references where applicable.
+The output file `security-report/architecture.md` must contain all 12 sections above with concrete source facts specific to the scanned codebase. Each section should include repository-relative paths and line references where applicable. The ledger is the authoritative coverage claim; the architecture file summarizes it.
 
 ## Common Challenges
 

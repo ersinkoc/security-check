@@ -95,7 +95,7 @@ cp -r security-check/skills/sc-* /path/to/your/project/.claude/skills/
 
 ## What is security-check?
 
-A collection of **48 agent skills** following the [agentskills.io](https://agentskills.io) standard that transforms your AI coding assistant into a comprehensive security scanning team. No binaries, no dependencies, no CI pipeline changes — just natural language prompts.
+A collection of **51 agent skills** following the [agentskills.io](https://agentskills.io) standard that transforms your AI coding assistant into a comprehensive security scanning team. No binaries, no dependencies, no CI pipeline changes — just natural language prompts.
 
 It is **not** a traditional SAST tool. It uses LLM reasoning to understand code context, trace data flows across function boundaries, and evaluate framework-level protections. The result: fewer false positives and deeper analysis than pattern-matching tools.
 
@@ -125,7 +125,7 @@ After installation, tell your AI assistant:
 | **"scan for vulnerabilities"** | Full scan (alias) |
 | **"check changes for security"** | Diff mode (alias) |
 
-## 48 Skills Included
+## 51 Skills Included
 
 ### Skill Structure (agentskills.io format)
 
@@ -152,6 +152,7 @@ sc-sqli/
 | **API** (3) | sc-api-security, sc-rate-limiting, sc-jwt | OWASP API Top 10, rate limiting, JWT flaws |
 | **Infrastructure** (3) | sc-iac, sc-docker, sc-ci-cd | IaC misconfig, Docker security, CI/CD pipeline vulns |
 | **Languages** (7) | sc-lang-go, sc-lang-typescript, sc-lang-python, sc-lang-php, sc-lang-rust, sc-lang-java, sc-lang-csharp | Language-specific deep scanning with 400+ item checklists |
+| **Specialized Surfaces** (3) | sc-ai-security, sc-protocol-security, sc-local-ipc | LLM/agent tools and memory, RPC/brokers/webhooks, desktop/mobile/local IPC |
 
 ### Language Scanners
 
@@ -185,6 +186,12 @@ PHASE 4: REPORT          CVSS severity classification, remediation roadmap
 OUTPUT:  security-report/SECURITY-REPORT.md
 ```
 
+The four phases are evidence-led: reconnaissance seeds a coverage ledger, hunters
+produce candidates, and a separate verification pass tries to disprove each candidate.
+Only a demonstrated trust-boundary failure is `confirmed`; unresolved source-grounded
+leads remain `needs_validation` without severity. See
+[Evidence and Coverage Model](docs/EVIDENCE_MODEL.md).
+
 ## Output
 
 After a scan, the `security-report/` directory contains:
@@ -195,6 +202,8 @@ After a scan, the `security-report/` directory contains:
 | `architecture.md` | Codebase architecture map |
 | `dependency-audit.md` | Supply chain analysis |
 | `verified-findings.md` | Findings after verification |
+| `coverage-ledger.md` | Explicit covered, candidate, blocked, deferred, and excluded units |
+| `findings.json` | Structured final verdicts: confirmed, needs_validation, rejected |
 | `findings/*.json` | Raw findings from each skill |
 
 ## Adding Custom Skills
@@ -212,6 +221,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+## Acknowledgements
+
+The evidence and coverage model in v1.2 was informed by Cloudflare's MIT-licensed
+[`security-audit-skill`](https://github.com/cloudflare/security-audit-skill) and
+adapted to security-check's multi-skill four-phase pipeline.
 
 ## Author
 
