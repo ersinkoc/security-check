@@ -36,6 +36,32 @@ For diff/incremental mode, see `sc-diff-report`.
 
 Before starting a scan:
 
+### Interactive Setup
+
+Honor profile, scope, validation, and prior-report choices already present in the request.
+For unresolved choices, use the host's structured question tool in one grouped call. In
+Claude Code use `AskUserQuestion` so the choices render as native selection cards:
+
+- **Profile:** Standard (recommended), Quick, Deep.
+- **Scope:** Whole repository (recommended), Changed files, Custom paths.
+- **Validation:** Source only (recommended), Sandboxed local checks.
+- **Previous report, when present:** Continue and revalidate (recommended), Archive and start new, Replace.
+
+Request a custom path only if that option is chosen. Selecting Changed files delegates to
+`sc-diff-report`. Selecting Replace is the required explicit authorization to replace prior
+artifacts; otherwise preserve them. If structured questions are unavailable, use standard,
+whole-repository, source-only, and continue/revalidate defaults unless the user specified
+otherwise. Do not ask again for facts already supplied.
+
+Profiles control breadth and redundancy, not the evidence bar:
+
+- `quick`: one bounded hunter wave and one coverage critic; report partial coverage.
+- `standard`: complete applicable skill coverage and one final coverage critic.
+- `deep`: finer subsystem/lifecycle units and repeat critics until clean or explicitly blocked.
+
+The menu grants no authority for live probing, external side effects, dependency installation,
+publication, credential use, paid services, or shared-infrastructure mutation.
+
 1. Resolve the repository root, source ref, requested scope, scan profile, output directory, and any time or agent budget.
 2. Check whether `security-report/` exists. Preserve prior artifacts by default; archive or replace them only with user authorization.
 3. Read compatible prior coverage and findings. Revalidate changed source and carry forward only evidence whose relevant source and conditions still hold.

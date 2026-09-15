@@ -6,7 +6,8 @@ description: >
   supply chain analysis, infrastructure-as-code scanning, and 3000+ checklist items.
   Use when you need to run a security audit, find vulnerabilities, scan a PR for security issues,
   or perform an authorized penetration test on a codebase. Full audits use evidence-led
-  coverage tracking and independent candidate verification.
+  coverage tracking and independent candidate verification. In Claude Code, invoke it directly
+  as /security-check to open the native audit setup menu.
 license: MIT
 compatibility: Works with Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Windsurf, Roo Code, Amp, and all agentskills.io compatible agents
 metadata:
@@ -35,6 +36,51 @@ After installation, open your AI assistant and say:
 - **"run security check"** — Full security audit
 - **"scan diff"** — PR/diff-level incremental scan
 - **"scan for vulnerabilities"** — Same as full scan
+
+In Claude Code, invoke **`/security-check`** from the `/` menu. For a full audit,
+open the interactive setup before creating report files or launching workers.
+
+For a full audit, load the detailed orchestrator before acting. Resolve it in this
+order so both installation layouts work:
+
+1. `skills/sc-orchestrator/SKILL.md` relative to this launcher when installed as a bundle.
+2. `../sc-orchestrator/SKILL.md` when shell/manual installation placed skills as siblings.
+
+Then load only the reconnaissance, hunting, verification, reporting, language, and
+specialized skill files selected by that orchestrator. The launcher owns interactive
+setup; do not ask the same setup questions again in the orchestrator.
+
+## Interactive Audit Setup
+
+Respect choices already stated in the user's request. Ask only for unresolved setup
+values. When the host provides a structured question tool, use one grouped menu call;
+in Claude Code, use `AskUserQuestion`. Do not print a fake numbered menu when the tool
+is available.
+
+Offer these choices:
+
+1. **Profile**
+   - `Standard (Recommended)` — full evidence-led audit with one coverage-critic pass.
+   - `Quick` — bounded first pass; always report partial coverage.
+   - `Deep` — finer subsystem/lifecycle coverage and repeated critic passes.
+2. **Scope**
+   - `Whole repository (Recommended)` — audit all source-visible surfaces.
+   - `Changed files` — switch to `sc-diff-report` and preserve diff-mode limitations.
+   - `Custom paths` — request the paths in one short follow-up.
+3. **Validation**
+   - `Source only (Recommended)` — read-only analysis; external facts become `needs_validation`.
+   - `Sandboxed local checks` — run only when every safe-execution control is available.
+4. **Previous report**, only when one exists
+   - `Continue and revalidate (Recommended)` — reuse compatible evidence and recheck changed source.
+   - `Archive and start new` — preserve the old directory under a dated unique name.
+   - `Replace` — proceed only when this explicit selection authorizes replacement.
+
+If the host has no structured question tool, infer non-destructive defaults: `standard`,
+whole repository, source-only validation, and continue/revalidate prior evidence. Ask a
+plain question only when a missing custom path or destructive choice blocks progress.
+Record the resolved choices in scan state and echo a one-line summary before Phase 1.
+Menu selection never authorizes live probing, external side effects, credential use,
+dependency installation, publication, or shared-infrastructure mutation.
 
 ## What's Included
 

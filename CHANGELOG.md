@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Three specialized scanners for AI/LLM/agent systems, RPC and messaging protocols, and desktop/mobile/local IPC boundaries
+- Claude Code `/security-check` launcher with native interactive setup menus for profile, scope, validation, and prior-report behavior
 - Evidence and coverage contract with distinct `confirmed`, `needs_validation`, and `rejected` verdicts
 - Coverage ledger, coverage-critic pass, prior-run revalidation, and safe local validation requirements
 - Structured `findings.json` as the final verdict source alongside the human-readable report
@@ -19,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Verification now challenges candidates independently where the host supports it; unverified raw candidates are never promoted when verification fails
 - Reports separate confirmed vulnerabilities, unresolved leads, hardening notes, positive controls, and incomplete coverage
 - Skill catalog and installers now include 51 skills
+- Shell and PowerShell installers now deploy the root launcher skill alongside the 51 scanning skills
 
 ### Acknowledgement
 

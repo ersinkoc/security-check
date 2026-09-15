@@ -36,9 +36,20 @@ Apply `.agents/skills/sc-orchestrator/SKILL.md` and its evidence contract. A pat
 
 Before starting any scan:
 
+When the host supports structured interactive questions, collect unresolved setup choices
+in one native menu: Profile (Standard/Quick/Deep), Scope (Whole repository/Changed files/
+Custom paths), Validation (Source only/Sandboxed local checks), and, when applicable, Prior
+report (Continue and revalidate/Archive/Replace). Recommend the first option in each group.
+Respect values already supplied by the user. Without structured questions, use the
+non-destructive defaults Standard, Whole repository, Source only, and Continue and revalidate.
+Selecting Replace is explicit replacement authorization; no menu choice authorizes live or
+external side effects.
+
 1. Check if a `security-report/` folder already exists in the project root.
-2. If it exists, ask the user:
-   - "A previous security report exists. Should I archive it (rename to security-report-YYYY-MM-DD/) and start fresh, or overwrite it?"
+2. If it exists and the request did not already choose a prior-report action, collect that action through the interactive setup above.
+   - Continue/revalidate keeps compatible evidence and rechecks changed source.
+   - Archive uses a dated unique directory and starts a new report.
+   - Replace removes prior artifacts only after that explicit selection.
 3. If it does not exist, create `security-report/` and proceed.
 4. Create `security-report/.scan-state.json` to track progress:
    ```json

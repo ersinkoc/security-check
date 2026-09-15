@@ -89,6 +89,8 @@ irm https://raw.githubusercontent.com/ersinkoc/security-check/main/skills.ps1 | 
 git clone https://github.com/ersinkoc/security-check.git
 cp security-check/scan-target/CLAUDE.md /path/to/your/project/
 mkdir -p /path/to/your/project/.claude/skills
+mkdir -p /path/to/your/project/.claude/skills/security-check
+cp security-check/SKILL.md /path/to/your/project/.claude/skills/security-check/SKILL.md
 cp -r security-check/skills/sc-* /path/to/your/project/.claude/skills/
 ```
 </details>
@@ -124,6 +126,20 @@ After installation, tell your AI assistant:
 | **"scan diff"** or **"PR scan"** | Scan only changed files |
 | **"scan for vulnerabilities"** | Full scan (alias) |
 | **"check changes for security"** | Diff mode (alias) |
+
+### Claude Code menu
+
+Open Claude Code's `/` menu and select **`/security-check`**. The launcher asks for
+the unresolved audit profile, scope, validation mode, and prior-report behavior using
+native selection cards. Explicit choices in the original prompt are not asked again.
+
+The `npx skills` installation exposes the repository as the `security-check` bundle.
+The shell and manual installers additionally expand the 51 scanning skills into sibling
+directories while installing the same `/security-check` launcher.
+
+Default choices are non-destructive: Standard, Whole repository, Source only, and
+Continue and revalidate. Selecting Changed files switches to diff mode; selecting Replace
+explicitly authorizes replacement of the previous report.
 
 ## 51 Skills Included
 

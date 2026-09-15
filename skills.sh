@@ -242,7 +242,21 @@ install_skills() {
         skill_count=$((skill_count + 1))
     done
 
-    echo -e "  ${GREEN}      Installed $skill_count skills${NC}"
+    # Install the user-facing launcher so Claude Code exposes /security-check
+    # and other Agent Skills hosts can invoke the complete workflow directly.
+    for platform in $platforms; do
+        local launcher_dir=""
+        case "$platform" in
+            claude)  launcher_dir=".claude/skills/security-check" ;;
+            agents|cursor|gemini) launcher_dir=".agents/skills/security-check" ;;
+        esac
+        if [ -n "$launcher_dir" ]; then
+            mkdir -p "$launcher_dir"
+            cp "$source_dir/SKILL.md" "$launcher_dir/SKILL.md"
+        fi
+    done
+
+    echo -e "  ${GREEN}      Installed $skill_count scanning skills + security-check launcher${NC}"
 
     # Install orchestration files
     for platform in $platforms; do
@@ -309,7 +323,7 @@ print_summary() {
     echo -e "  ${GREEN}│  Installation complete!                                  │${NC}"
     echo -e "  ${GREEN}└─────────────────────────────────────────────────────────┘${NC}"
     echo ""
-    echo -e "  ${BOLD}Installed:${NC} $count skills (agentskills.io format)"
+    echo -e "  ${BOLD}Installed:${NC} $count scanning skills + security-check launcher"
     echo ""
     echo -e "  ${BOLD}Next steps:${NC}"
     echo -e "    1. Open your AI coding assistant"

@@ -33,9 +33,30 @@ Apply `.claude/skills/sc-orchestrator/SKILL.md` and its evidence contract. A pat
 
 Before starting any scan:
 
+#### Native Interactive Setup
+
+Use Claude Code's `AskUserQuestion` tool before writes or worker launches. Ask only for
+values the user did not already specify, and combine the unresolved questions into one call:
+
+| Header | Question | Options |
+|---|---|---|
+| Profile | How thorough should this audit be? | Standard (Recommended), Quick, Deep |
+| Scope | What should be reviewed? | Whole repository (Recommended), Changed files, Custom paths |
+| Validation | How should behavior be checked? | Source only (Recommended), Sandboxed local checks |
+| Prior report | What should happen to the existing report? | Continue and revalidate (Recommended), Archive and start new, Replace |
+
+Omit Prior report when none exists. Ask for paths only after Custom paths is selected.
+Changed files delegates to diff mode. Replace is destructive and requires that explicit
+selection. If `AskUserQuestion` is unavailable, use Standard, Whole repository, Source only,
+and Continue and revalidate; ask plain text only for a blocking custom path. Summarize the
+resolved choices in one line before Phase 1. These selections never authorize live probing,
+external side effects, credential use, dependency installation, or shared-system mutation.
+
 1. Check if a `security-report/` folder already exists in the project root.
-2. If it exists, ask the user:
-   - "A previous security report exists. Should I archive it (rename to security-report-YYYY-MM-DD/) and start fresh, or overwrite it?"
+2. If it exists and the request did not already choose a prior-report action, collect that action through the Native Interactive Setup menu above.
+   - Continue/revalidate keeps compatible evidence and rechecks changed source.
+   - Archive uses a dated unique directory and starts a new report.
+   - Replace removes prior artifacts only after that explicit selection.
 3. If it does not exist, create `security-report/` and proceed.
 4. Create `security-report/.scan-state.json` to track progress:
    ```json

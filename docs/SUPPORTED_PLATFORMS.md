@@ -73,6 +73,8 @@ cp /tmp/security-check/scan-target/CLAUDE.md ./CLAUDE.md
 
 # Copy skill files (agentskills.io folder format)
 mkdir -p .claude/skills
+mkdir -p .claude/skills/security-check
+cp /tmp/security-check/SKILL.md .claude/skills/security-check/SKILL.md
 cp -r /tmp/security-check/skills/sc-* .claude/skills/
 
 # Clean up
@@ -86,13 +88,15 @@ your-project/
 ├── CLAUDE.md                    # Orchestration instructions
 └── .claude/
     └── skills/
+        ├── security-check/
+        │   └── SKILL.md         # /security-check menu launcher
         ├── sc-orchestrator/
         │   └── SKILL.md
         ├── sc-recon/
         │   └── SKILL.md
         ├── sc-sqli/
         │   └── SKILL.md
-        ├── ... (51 skill folders)
+        ├── ... (51 scanning skill folders total)
         ├── sc-lang-go/
         │   ├── SKILL.md
         │   └── references/
@@ -117,11 +121,15 @@ The security-check instructions are designed to be non-conflicting with other pr
 Open Claude Code in your project directory and use any of these commands:
 
 ```
+"/security-check"
 "run security check"
 "scan for vulnerabilities"
 "security audit"
 "scan this project for security issues"
 ```
+
+`/security-check` appears in Claude Code's `/` menu and opens native setup choices for
+profile, scope, validation, and prior-report behavior before the audit starts.
 
 For diff mode (scanning only changed files):
 

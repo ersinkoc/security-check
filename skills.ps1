@@ -233,7 +233,22 @@ function Main {
         }
         $count++
     }
-    Write-Host "      Installed $count skills" -ForegroundColor Green
+
+    # Install the user-facing launcher so Claude Code exposes /security-check
+    # and other Agent Skills hosts can invoke the complete workflow directly.
+    $entrySkill = Join-Path $sourceDir 'SKILL.md'
+    foreach ($platform in $platforms) {
+        $entryDir = switch ($platform) {
+            'claude' { '.claude\skills\security-check' }
+            default  { '.agents\skills\security-check' }
+        }
+        if (-not (Test-Path $entryDir)) {
+            New-Item -ItemType Directory -Path $entryDir -Force | Out-Null
+        }
+        Copy-Item -Path $entrySkill -Destination (Join-Path $entryDir 'SKILL.md') -Force
+    }
+
+    Write-Host "      Installed $count scanning skills + security-check launcher" -ForegroundColor Green
 
     # Orchestration files
     foreach ($platform in $platforms) {
@@ -289,7 +304,7 @@ function Main {
     Write-Host '  |  Installation complete!                                    |' -ForegroundColor Green
     Write-Host '  +-----------------------------------------------------------+' -ForegroundColor Green
     Write-Host ''
-    Write-Host "  Installed: $count skills (agentskills.io format)"
+    Write-Host "  Installed: $count scanning skills + security-check launcher"
     Write-Host ''
     Write-Host '  Next: open your AI assistant and say ' -NoNewline
     Write-Host '"run security check"' -ForegroundColor Cyan
