@@ -17,6 +17,7 @@ npx skills add ersinkoc/security-check
 That's it. Open your AI assistant and say **"run security check"**.
 
 
+
 ---
 
 ## ⚡ Sponsored by WrongStack
@@ -35,6 +36,9 @@ That's it. Open your AI assistant and say **"run security check"**.
 
 ```bash
 curl -fsSL https://wrongstack.com/install.sh | sh   # macOS / Linux — self-contained binary
+```
+
+```powershell
 irm https://wrongstack.com/install.ps1 | iex        # Windows (PowerShell) — no Node.js needed
 ```
 
