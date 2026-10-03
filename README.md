@@ -25,28 +25,36 @@ That's it. Open your AI assistant and say **"run security check"**.
 
 ### _Built on the wrong stack. Shipped anyway._
 
-**[WrongStack](https://wrongstack.com)** is a terminal-native AI coding agent that reads your code, edits files, runs commands, and reasons through bugs — across a plain REPL, a full-screen TUI, and a browser UI. You keep your hand on every permission.
+**[WrongStack](https://wrongstack.com)** is a free, [open-source](https://github.com/WrongStack/WrongStack) AI coding agent with a Brain, a Memory, and a full toolbox. It reads your code, edits files, runs commands, and coordinates specialist agents — across six surfaces, from a plain terminal REPL to a cross-machine HQ dashboard. No subscription required, and you keep your hand on every permission.
 
 [![Website](https://img.shields.io/badge/%F0%9F%8C%90_Website-wrongstack.com-6E56CF?style=for-the-badge)](https://wrongstack.com)
 &nbsp;
-[![GitHub](https://img.shields.io/badge/GitHub-wrongstack%2Fwrongstack-181717?style=for-the-badge&logo=github)](https://github.com/wrongstack/wrongstack)
+[![GitHub](https://img.shields.io/badge/GitHub-WrongStack%2FWrongStack-181717?style=for-the-badge&logo=github)](https://github.com/WrongStack/WrongStack)
+&nbsp;
+[![Stars](https://img.shields.io/github/stars/WrongStack/WrongStack?style=for-the-badge&color=e3b341&logo=github)](https://github.com/WrongStack/WrongStack/stargazers)
+
+```bash
+curl -fsSL https://wrongstack.com/install.sh | sh   # macOS / Linux — self-contained binary
+irm https://wrongstack.com/install.ps1 | iex        # Windows (PowerShell) — no Node.js needed
+```
 
 </div>
 
 | | What you get |
 |---|---|
-| 🧠 **~110 LLM providers** | Anthropic, OpenAI, Google, and any OpenAI-compatible endpoint |
-| 🛠️ **36 built-in tools** | Read, edit, search, test, and run shell — every call gated by per-tool permissions |
-| 🖥️ **3 surfaces** | Plain readline REPL · Ink/React TUI (`--tui`) · standalone web UI |
-| 🤖 **Fleet orchestration** | A **Director** coordinates subagents; `eternal` & `parallel` autonomous loops |
-| 📋 **Spec-Driven Development** | Hand it a `PROMPT.md` and let it build the whole project, single-shot |
-| 🔐 **Secure by default** | AES-256-GCM secret storage, per-tool policies, opt-in YOLO mode |
+| 🌐 **[200+ LLM providers](https://wrongstack.com)** | Catalog pulled live from models.dev — Anthropic, OpenAI, Google, plus OAuth sign-in for Claude Pro/Max, ChatGPT and Copilot, and any OpenAI-compatible endpoint (Ollama, vLLM, LM Studio) |
+| 🛠️ **[67 built-in tools](https://github.com/WrongStack/WrongStack)** | Edits, lint/typecheck/test, execution, git, web, browser/E2E and a SQLite codebase index — every call gated by per-tool permissions |
+| 🧠 **[SAGE memory](https://github.com/WrongStack/WrongStack/blob/main/docs/sage/ARCHITECTURE.md)** | Project-wide long-term memory in SQLite/FTS5, anchored to files, symbols and commits — it gets better at *your* codebase over time |
+| 🖥️ **[Six surfaces](https://wrongstack.com)** | Readline REPL · Ink/React TUI (`--tui`) · WebUI · SimpleUI · Desktop · cross-machine HQ (`--hq`) |
+| 🤖 **[Fleet orchestration](https://github.com/WrongStack/WrongStack/blob/main/docs/director-architecture.md)** | A Director fans out specialist subagents over a project mailbox; `eternal` & `parallel` goal loops run until the contract verifies |
+| 🔍 **[Chimera & Kanban](https://wrongstack.com)** | Auto-review agents that critique your diffs with severity-ranked findings, plus durable Kanban boards with atomic verification |
+| 🔐 **[Secure by default](https://github.com/WrongStack/WrongStack/blob/main/SECURITY.md)** | Encrypted secrets at rest, project-root containment, opt-in YOLO mode — MIT licensed, TypeScript-strict |
 
-> **🧩 The perfect pairing:** Plan with **Project Architect**, then hand the generated `PROMPT.md` to **WrongStack** for spec-driven, single-shot execution. Architect the *what* and the *how* — WrongStack ships it.
+> **📊 The perfect pairing:** This band tells you exactly where your Claude limits stand — and **WrongStack** keeps you moving when they close in. It reads plan windows for Claude, ChatGPT, Copilot, Z.AI and more right in its own statusline and quota page, and when one provider runs dry, **fallback chains** rotate you onto the next model automatically. Watch the band, dodge the wall.
 
 <div align="center">
 
-🔗 **[wrongstack.com](https://wrongstack.com)** &nbsp;·&nbsp; **[github.com/wrongstack/wrongstack](https://github.com/wrongstack/wrongstack)**
+🔗 **[wrongstack.com](https://wrongstack.com)** &nbsp;·&nbsp; **[github.com/WrongStack/WrongStack](https://github.com/WrongStack/WrongStack)** &nbsp;·&nbsp; ⭐ **[Star it on GitHub](https://github.com/WrongStack/WrongStack/stargazers)**
 
 </div>
 
